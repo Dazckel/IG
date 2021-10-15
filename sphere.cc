@@ -11,5 +11,5 @@ _sphere::_sphere()
     v[0] = _vertex3f(1,0,0);
 
     eje e = eje::EJE_Y;
-    crear_OR(v,3,e);
+    crear_OR(v,10,e);
 }
