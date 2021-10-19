@@ -1,6 +1,5 @@
 #include "object_rev.h"
 #include "math.h"
-const double PI = 3.1415;
 
 
 //Constructor de la clase revolución.
@@ -20,9 +19,9 @@ void _revolution::crear_OR(vector<_vertex3f> v, int nr,eje e)
     //ESFERA
   if(v.size()==1){
         v = Vertices;
-        
-        RotarVertices(v,nr,eje::EJE_X);
         v[v.size()-1].z = 0;
+        RotarVertices(v,nr,eje::EJE_X);
+
         GenerarTriangulos(v,nr,eje::EJE_X);
   }
   else
@@ -57,8 +56,8 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
         // la unión final-principio va  aparte en una zona contigua del vector
         for(int j = 0; j < nv_sinrep-1;j++)
             for(int i = 0; i < nr-1;i++,p+=2){
-                Triangles[p]   = _vertex3ui(0+(i*nv_sinrep),2+(i*nv_sinrep),1+(i*nv_sinrep));
-                Triangles[p+1] = _vertex3ui(2+(i*nv_sinrep),3+(i*nv_sinrep),1+(i*nv_sinrep));
+                Triangles[p]   = _vertex3ui((0+(i*nv_sinrep))+j ,(nv_sinrep+(i*nv_sinrep))+j,(1+(i*nv_sinrep))+j);
+                Triangles[p+1] = _vertex3ui((nv_sinrep+(i*nv_sinrep))+j,(nv_sinrep+1+(i*nv_sinrep))+j,(1+(i*nv_sinrep))+j);
             }
 
 
@@ -70,11 +69,11 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
         p=tf;
         // este bucle recorre la matriz de triangulos de arriba abajo, osea, la ultima columna
         //que son aquellos triangulos que cierran la figura.
-        /*for(int i =0; i < nv_sinrep-1;i++,p+=tf)
+        for(int i =0; i < nv_sinrep-1;i++,p+=tf)
         {
-                Triangles[p-2]   = _vertex3ui((nr-1)*nv_sinrep,i,nv_rot-1);
-                Triangles[p-1]   = _vertex3ui(i,i+1,nv_rot-1+i);
-        }*/
+                Triangles[p-2]   = _vertex3ui(i+(nr-1)*nv_sinrep,i,i+nv_rot-(nv_sinrep-1));
+                Triangles[p-1]   = _vertex3ui(i,i+1,nv_rot-(nv_sinrep-1)+i);
+        }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
         //TAPAS
@@ -90,7 +89,7 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
 
     //Se hace en 3 partes, porque según tengra 1 o 2 tapas, el vertice que cierra ocupa posicione fiderentes del vector.
     
-    /*int nt = n_tapas(v,e);
+    int nt = n_tapas(v,e);
     if(nt==3)
         for(int i = 0; i < nr;i++,p+=2){                           //Multiplico *2 porque ha de empezar en al 2da rotación
             Triangles[p]   = _vertex3ui(nv_sinrep-1 + i*nv_sinrep,((2+i)*nv_sinrep-1)%nv_rot ,tamanio-1);
@@ -98,7 +97,7 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
         }
     else
         for(int i = 0; i < nr;i++,p++)
-            Triangles[p] = _vertex3ui(i*nv_sinrep,nv_rot,tamanio-1);*/
+            Triangles[p] = _vertex3ui(i*nv_sinrep,nv_rot,tamanio-1);
     glEnd();
 }
 
@@ -147,7 +146,7 @@ void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e)
     //Calculamos el angulo con el que efetuaremos las rotaciones
 
     
-    double ang = 2*PI/nr;
+    double ang = 2*M_PI/nr;
     int nv_sinrep =  plantilla_sin_rep.size();
     int tamanio = nv_sinrep*nr+ v.size()-nv_sinrep;
 
@@ -155,7 +154,7 @@ void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e)
 
     //Si es una esfera,rotamos media circunferencia para obtener la plantilla.
     if(v.size() == 1){
-        ang = PI/nr;
+        ang = M_PI/nr;
         nr++;
         tamanio++;
     }
