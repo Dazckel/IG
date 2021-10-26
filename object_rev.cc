@@ -24,9 +24,11 @@ void _revolution::crear_OR(vector<_vertex3f> v, int nr,eje e,objeto o)
         switch (e)
         {
         case eje::EJE_X:
+            v[v.size()-1].z = 0;
             e = eje::EJE_Y;
             break;
         case eje::EJE_Y:
+            v[v.size()-1].z = 0;
             e = eje::EJE_X;
             break;
         case eje::EJE_Z:
@@ -97,14 +99,15 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
     //Multiplicamos*2 porque en cada iteración del bucle de los triangulos centrales, creabamos 2 triangulos
     // el par y el impar.
     p=nr*(nv_sinrep-1)*2;
+    
 
     //Se hace en 3 partes, porque según tengra 1 o 2 tapas, el vertice que cierra ocupa posicione fiderentes del vector.
     
     int nt = n_tapas(v,e);
     if(nt==3)
-        for(int i = 0; i < nr;i++,p+=2){                           //Multiplico *2 porque ha de empezar en al 2da rotación
-            Triangles[p]   = _vertex3ui(nv_sinrep-1 + i*nv_sinrep,((2+i)*nv_sinrep-1)%nv_rot ,tamanio-1);
-            Triangles[p+1]   = _vertex3ui(i*nv_sinrep,tamanio-2,(nv_sinrep*(i+1))%nv_rot);
+        for(int i = 0; i < nr;i++){                           //Multiplico *2 porque ha de empezar en al 2da rotación
+            Triangles[p+nr+i]   = _vertex3ui(nv_sinrep-1 + i*nv_sinrep,((2+i)*nv_sinrep-1)%nv_rot ,tamanio-1);
+            Triangles[p+i]   = _vertex3ui(i*nv_sinrep,tamanio-2,(nv_sinrep*(i+1))%nv_rot);
         }
     else
         for(int i = 0; i < nr;i++,p++)
