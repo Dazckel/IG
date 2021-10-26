@@ -66,7 +66,7 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
         //Creamos los triángulos centrales que no se repiten, y
         // la unión final-principio va  aparte en una zona contigua del vector
         for(int j = 0; j < nv_sinrep-1;j++)
-            for(int i = 0; i < nr-1;i++,p+=2){
+            for(int i = 0; i < nr;i++,p+=2){
                 Triangles[p]   = _vertex3ui((0+(i*nv_sinrep))+j ,(nv_sinrep+(i*nv_sinrep))+j,(1+(i*nv_sinrep))+j);
                 Triangles[p+1] = _vertex3ui((nv_sinrep+(i*nv_sinrep))+j,(nv_sinrep+1+(i*nv_sinrep))+j,(1+(i*nv_sinrep))+j);
             }
