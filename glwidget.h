@@ -37,7 +37,7 @@ namespace _gl_widget_ne {
   const float DEFAULT_DISTANCE=2;
   const float ANGLE_STEP=1;
 
-  typedef enum {MODE_DRAW_POINT,MODE_DRAW_LINE,MODE_DRAW_FILL,MODE_DRAW_CHESS} _mode_draw;
+  typedef enum {MODE_DRAW_POINT,MODE_DRAW_LINE,MODE_DRAW_FILL,MODE_DRAW_CHESS,MOVER} _mode_draw;
   typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_CONE,OBJECT_CYLINDER,OBJECT_SPHERE} _object;
 }
 
@@ -86,6 +86,7 @@ private:
   bool Draw_line;
   bool Draw_fill;
   bool Draw_chess;
+  bool mover;
 
   float Observer_angle_x;
   float Observer_angle_y;

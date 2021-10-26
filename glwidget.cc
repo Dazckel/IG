@@ -45,9 +45,11 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_3:Object=OBJECT_CYLINDER;break;
   case Qt::Key_4:Object=OBJECT_CONE;break;
   case Qt::Key_5:Object=OBJECT_SPHERE;break;
+ 
+
 
   //
-
+ // case Qt::Key_6:mover=!mover;break;
   case Qt::Key_P:Draw_point=!Draw_point;break;
   case Qt::Key_L:Draw_line=!Draw_line;break;
   case Qt::Key_F:Draw_fill=!Draw_fill;break;
@@ -171,6 +173,22 @@ void _gl_widget::draw_objects()
     }
   }
 
+  //
+  /*if(mover){
+    _vertex3f v = _vertex3f(4,4,4);
+    switch (Object){
+    case OBJECT_TETRAHEDRON:Tetrahedron.mover(v);break;
+    case OBJECT_CUBE:Cube.mover(v);break;
+    //
+    case OBJECT_CYLINDER:Cylinder.mover(v);break;
+    case OBJECT_CONE:Cone.mover(v);break;  
+    
+    case OBJECT_SPHERE:Sphere.mover(v);break;
+  
+    default:break;
+    }
+  }*/
+
   if (Draw_chess){
     switch (Object){
     case OBJECT_TETRAHEDRON:Tetrahedron.draw_chess();break;
@@ -257,4 +275,5 @@ void _gl_widget::initializeGL()
   Draw_line=true;
   Draw_fill=false;
   Draw_chess=false;
+  mover=false;
 }

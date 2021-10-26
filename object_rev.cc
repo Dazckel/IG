@@ -11,21 +11,32 @@ _revolution::_revolution()
 
 
 //Función que crea un objeto por el método de revolución
-void _revolution::crear_OR(vector<_vertex3f> v, int nr,eje e)
+void _revolution::crear_OR(vector<_vertex3f> v, int nr,eje e,objeto o)
 {
-  RotarVertices(v,nr,e);
+  RotarVertices(v,nr,e,o);
 
 
     //ESFERA
-  if(v.size()==1){
+  if(o == objeto::SPHERE_P){
         v = Vertices;
-        v[v.size()-1].z = 0;
-        RotarVertices(v,nr,eje::EJE_X);
+        o = objeto::SPHERE;
 
-        GenerarTriangulos(v,nr,eje::EJE_X);
+        switch (e)
+        {
+        case eje::EJE_X:
+            e = eje::EJE_Y;
+            break;
+        case eje::EJE_Y:
+            e = eje::EJE_X;
+            break;
+        case eje::EJE_Z:
+            e = eje::EJE_X;
+            break;
+        }
+        RotarVertices(v,nr,e,o);
   }
-  else
-    GenerarTriangulos(v,nr,e);
+  
+  GenerarTriangulos(v,nr,e);
 }
 
 void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
@@ -131,7 +142,7 @@ bool _revolution::dentro_eje(_vertex3f p,eje e)
 }
 
 
-void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e)
+void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e,objeto o)
 {
     //Vector/plantilla que no contiene los vértices de la tapa, es decir, los que se repiten
     //Usaremos este vector para efectuar las rotaciones, ya que los vértices que si podemos rotar si son
@@ -153,7 +164,7 @@ void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e)
 
 
     //Si es una esfera,rotamos media circunferencia para obtener la plantilla.
-    if(v.size() == 1){
+    if((o == objeto::SPHERE_P)){
         ang = M_PI/nr;
         nr++;
         tamanio++;
