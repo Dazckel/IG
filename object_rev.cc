@@ -32,6 +32,7 @@ void _revolution::crear_OR(vector<_vertex3f> v, int nr,eje e,objeto o)
             e = eje::EJE_X;
             break;
         case eje::EJE_Z:
+            v[v.size()-1].y = 0;
             e = eje::EJE_X;
             break;
         }
@@ -164,23 +165,16 @@ void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e,objeto o)
     int nv_sinrep =  plantilla_sin_rep.size();
     int tamanio = nv_sinrep*nr+ v.size()-nv_sinrep;
 
-
-
     //Si es una esfera,rotamos media circunferencia para obtener la plantilla.
     if((o == objeto::SPHERE_P)){
         ang = M_PI/nr;
+        //añadimos una rotación más porque si no no se cierra la figura, solo tendría una tapa.
+        //al ser media circunferencia
         nr++;
         tamanio++;
     }
-
-    //nvertices que no se repiten
-
-
     //Tamaño total que tendrá el vector de vértices: vertices que rotan + los que no 
-
-
     Vertices.resize(tamanio);
-    
     int p = 0;
 
 //
@@ -227,7 +221,6 @@ void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e,objeto o)
 
     //Número de vértices de la plantilla
     int n_vertices = v.size();
-
     int nt = n_tapas(v,e);
 
     if(nt==3){
@@ -239,8 +232,6 @@ void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e,objeto o)
         Vertices[p] = v[n_vertices-1];
 
 }
-
-
 
 //Nos dice cuantas tapas tiene nuestro perfil.
 //Devuelve un entero que indica:
