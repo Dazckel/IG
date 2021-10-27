@@ -12,6 +12,13 @@
 enum class eje{EJE_X,EJE_Y,EJE_Z};
 enum class objeto{CONE,CYLINDER,SPHERE_P,SPHERE};
 
+//CONSTANTES//
+const int TR_IN_SQ =2;      /**Número de triangulos en un cuadrado*/
+const int DOS_TP = 3;
+const int TP_INF = 2;
+const int TP_SUP = 1;
+
+
 class _revolution: public _object3D
 {
 

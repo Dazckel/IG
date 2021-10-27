@@ -1,291 +1,230 @@
 #include "object_rev.h"
 #include "math.h"
 
-
 //Constructor de la clase revolución.
 _revolution::_revolution()
 {
-
-
 }
 
-
 //Función que crea un objeto por el método de revolución
-void _revolution::crear_OR(vector<_vertex3f> v, int nr,eje e,objeto o)
+void _revolution::crear_OR(vector<_vertex3f> v, int nr, eje e, objeto o)
 {
-  RotarVertices(v,nr,e,o);
-
+    RotarVertices(v, nr, e, o);
 
     //ESFERA
-  if(o == objeto::SPHERE_P){
+    //El modo en el que genero la esfera es rotando dos veces, en 2 ejes distintos
+    if (o == objeto::SPHERE_P)
+    {
         v = Vertices;
         o = objeto::SPHERE;
 
         switch (e)
         {
         case eje::EJE_X:
-            v[v.size()-1].z = 0;
             e = eje::EJE_Y;
             break;
         case eje::EJE_Y:
-            v[v.size()-1].z = 0;
             e = eje::EJE_X;
             break;
         case eje::EJE_Z:
-            v[v.size()-1].y = 0;
             e = eje::EJE_X;
             break;
         }
-        RotarVertices(v,nr,e,o);
-  }
-  
-  GenerarTriangulos(v,nr,e);
+        RotarVertices(v, nr, e, o);
+    }
+
+    GenerarTriangulos(v, nr, e);
 }
 
-void _revolution::GenerarTriangulos(vector<_vertex3f> v,int nr,eje e)
+void _revolution::GenerarTriangulos(vector<_vertex3f> v, int nr, eje e)
 {
-    int nv_sinrep = 0;
 
+    int nt = n_tapas(v, e); /**Número de tapas*/
+    int nv_sinrep = 0;      /**Número de vertices de la plantilla que no se repiten*/
+    
+    if (nt == DOS_TP)
+        nv_sinrep = v.size() - 2;
+    else if (nt == TP_SUP || nr == TP_INF)
+        nv_sinrep = v.size() - 1;
 
-    //Cojemos aquellos vértices que no se encuentren en la tapa.
-    for(unsigned int i = 0; i < v.size();i++)
-        if(!dentro_eje(v[i],e))
-            nv_sinrep++;
+    int nv_tot = nv_sinrep * nr; /**Vértices totales de la figura, sin contar los de las tapas*/
+    Triangles.resize(nv_tot * TR_IN_SQ);
 
-    //Núemro de vértices que vamos a rotar.
-    int nv_rot = nv_sinrep*nr;
-
-    //Creamos los triángulos
-    int size = nv_rot*2;
-    Triangles.resize(size);
-
+    //CREACION DE LOS TRIÁNGULOS DIFERENCIANDO 3 ZONAS.
+    glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
     int p = 0;
 
-    glPolygonMode(GL_FRONT_AND_BACK,GL_TRIANGLES);
+    //TRIANGULOS CENTRALES//
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-        //TRIANGULOS CENTRALES
-////////////////////////////////////////////////////////////////////////////////////////////////       
-        //Creamos los triángulos centrales que no se repiten, y
-        // la unión final-principio va  aparte en una zona contigua del vector
-        for(int j = 0; j < nv_sinrep-1;j++)
-            for(int i = 0; i < nr;i++,p+=2){
-                Triangles[p]   = _vertex3ui((0+(i*nv_sinrep))+j ,(nv_sinrep+(i*nv_sinrep))+j,(1+(i*nv_sinrep))+j);
-                Triangles[p+1] = _vertex3ui((nv_sinrep+(i*nv_sinrep))+j,(nv_sinrep+1+(i*nv_sinrep))+j,(1+(i*nv_sinrep))+j);
-            }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-        //TRIANGULOS QUE CIERRAN.
-////////////////////////////////////////////////////////////////////////////////////////////////
-        //Triangulos del final: tf
-        int tf= nr*2;
-        p=tf;
-        // este bucle recorre la matriz de triangulos de arriba abajo, osea, la ultima columna
-        //que son aquellos triangulos que cierran la figura.
-        for(int i =0; i < nv_sinrep-1;i++,p+=tf)
+    //Creamos los triángulos centrales que no se repiten, y
+    // la unión final-principio va  aparte en una zona contigua del vector
+    for (int j = 0; j < nv_sinrep - 1; j++)
+        for (int i = 0; i < nr; i++, p += TR_IN_SQ)
         {
-                Triangles[p-2]   = _vertex3ui(i+(nr-1)*nv_sinrep,i,i+nv_rot-(nv_sinrep-1));
-                Triangles[p-1]   = _vertex3ui(i,i+1,nv_rot-(nv_sinrep-1)+i);
+            Triangles[p] = _vertex3ui((0 + (i * nv_sinrep)) + j, (nv_sinrep + (i * nv_sinrep)) + j, (1 + (i * nv_sinrep)) + j);
+            Triangles[p + 1] = _vertex3ui((nv_sinrep + (i * nv_sinrep)) + j, (nv_sinrep + 1 + (i * nv_sinrep)) + j, (1 + (i * nv_sinrep)) + j);
         }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-        //TAPAS
-////////////////////////////////////////////////////////////////////////////////////////////////
+    //TRIANGULOS QUE CIERRAN//
 
-    int tamanio = nv_sinrep*nr+ v.size()-nv_sinrep;
+    p = nr * TR_IN_SQ;
+    // este bucle recorre la matriz de triangulos de arriba abajo en la última columna
+    for (int i = 0; i < nv_sinrep - 1; i++, p += nr * TR_IN_SQ)
+    {
+        Triangles[p - 2] = _vertex3ui(i + (nr - 1) * nv_sinrep, i, i + nv_tot - (nv_sinrep - 1));
+        Triangles[p - 1] = _vertex3ui(i, i + 1, nv_tot - (nv_sinrep - 1) + i);
+    }
 
-    //Establecemos el indice donde corresponda.
-    //Restamos 1 porque con 1v no se crea nada, con 2v se crea una fila de triangulos, con 3v dos filas...
-    //Multiplicamos*2 porque en cada iteración del bucle de los triangulos centrales, creabamos 2 triangulos
-    // el par y el impar.
-    p=nr*(nv_sinrep-1)*2;
-    
+    //TRIÁNGULOS DE LAS TAPAS//
 
-    //Se hace en 3 partes, porque según tengra 1 o 2 tapas, el vertice que cierra ocupa posicione fiderentes del vector.
-    
-    int nt = n_tapas(v,e);
-    if(nt==3)
-        for(int i = 0; i < nr;i++){                           //Multiplico *2 porque ha de empezar en al 2da rotación
-            Triangles[p+nr+i]   = _vertex3ui(nv_sinrep-1 + i*nv_sinrep,((2+i)*nv_sinrep-1)%nv_rot ,tamanio-1);
-            Triangles[p+i]   = _vertex3ui(i*nv_sinrep,tamanio-2,(nv_sinrep*(i+1))%nv_rot);
+    int tamanio = nv_sinrep * nr + v.size() - nv_sinrep;
+    p = nr * (nv_sinrep - 1) * TR_IN_SQ; /**Nos indica donde empezar a almacenar los triángulos que faltan*/
+
+    if (nt == 3)
+        for (int i = 0; i < nr; i++)
+        { //Multiplico *2 porque ha de empezar en al 2da rotación
+            Triangles[p + nr + i] = _vertex3ui(nv_sinrep - 1 + i * nv_sinrep, ((2 + i) * nv_sinrep - 1) % nv_tot, tamanio - 1);
+            Triangles[p + i] = _vertex3ui(i * nv_sinrep, tamanio - 2, (nv_sinrep * (i + 1)) % nv_tot);
         }
     else
-        for(int i = 0; i < nr;i++,p++)
-            Triangles[p] = _vertex3ui(i*nv_sinrep,nv_rot,tamanio-1);
+        for (int i = 0; i < nr; i++, p++)
+            Triangles[p] = _vertex3ui(i * nv_sinrep, nv_tot, tamanio - 1);
+
     glEnd();
 }
 
-//Nos dice que  vertice/punto se encuentra dentro del eje Y
-bool _revolution::dentro_eje(_vertex3f p,eje e)
+/////////////////////////////////////////////////////////
+void _revolution::RotarVertices(vector<_vertex3f> v, int nr, eje e, objeto o)
 {
-    bool dentro = false;
-    
-    switch (e)
+    vector<_vertex3f> plantilla_sin_rep; /**Vector sin vertices de las tapas*/
+    int n_vertices = v.size();           /**Vértices de la plantilla*/
+    //Indice para el bucle que coge los vértices "centrales"
+    int ind_i = 0;
+    int nt = n_tapas(v, e);     /**Número de tapas de la figura*/
+    int nv_sinrep = n_vertices; /**Vértices que no se repiten,supongo que no tiene tapas*/
+
+    if (nt == DOS_TP)
     {
-    case eje::EJE_X:
-        if(p.y==0  && p.z==0)
-        dentro = true;
-        
-        break;
-          
-
-    case eje::EJE_Y:
-        if(p.x==0  && p.z==0)
-            dentro = true;
-        break;
-      
-    
-    case eje::EJE_Z:
-        if(p.x==0  && p.y==0)
-            dentro = true;
-        break;
-      
+        ind_i++;
+        nv_sinrep -= 2;
     }
-    return dentro;
-}
+    else if (nt == TP_SUP)
+        nv_sinrep -= 1;
+    else if (nt == TP_INF)
+    {
+        ind_i++;
+        nv_sinrep -= 1;
+    }
 
+    plantilla_sin_rep.resize(nv_sinrep);
+    for (int i = 0; i < nv_sinrep; ind_i++, i++)
+        plantilla_sin_rep[i] = v[ind_i];
 
-void _revolution::RotarVertices(vector<_vertex3f> v,int nr,eje e,objeto o)
-{
-    //Vector/plantilla que no contiene los vértices de la tapa, es decir, los que se repiten
-    //Usaremos este vector para efectuar las rotaciones, ya que los vértices que si podemos rotar si son
-    //vertices diferentes en el espacio.
-    vector<_vertex3f> plantilla_sin_rep;
-
-    //Rellenamos nuestra plantilla sin repetidos.
-    for(unsigned int i = 0; i < v.size();i++)
-        if(!dentro_eje(v[i],e))
-            plantilla_sin_rep.push_back(v[i]);
-    
-    //Calculamos el angulo con el que efetuaremos las rotaciones
-
-    
-    double ang = 2*M_PI/nr;
-    int nv_sinrep =  plantilla_sin_rep.size();
-    int tamanio = nv_sinrep*nr+ v.size()-nv_sinrep;
+    double ang = 2 * M_PI / nr;
+    int tamanio = nv_sinrep * nr + n_vertices - nv_sinrep;
 
     //Si es una esfera,rotamos media circunferencia para obtener la plantilla.
-    if((o == objeto::SPHERE_P)){
-        ang = M_PI/nr;
-        //añadimos una rotación más porque si no no se cierra la figura, solo tendría una tapa.
-        //al ser media circunferencia
-        nr++;
+    if (o == objeto::SPHERE_P)
+    {
+        ang = M_PI / nr;
         tamanio++;
     }
-    //Tamaño total que tendrá el vector de vértices: vertices que rotan + los que no 
+    //Tamaño total que tendrá el vector de vértices: vertices que rotan + los que no
     Vertices.resize(tamanio);
     int p = 0;
 
-//
+    //
     //Rotamos en función del eje.
 
-
-
-            switch (e)
+    switch (e)
+    {
+    case eje::EJE_X:
+        for (int i = 0; i < nr; i++)
+            for (int j = 0; j < nv_sinrep; j++, p++)
             {
-            case eje::EJE_X:
-                for(int i = 0; i < nr;i++)
-                    for(int j = 0;j<nv_sinrep;j++,p++){
-                double R = Distancia(plantilla_sin_rep[j],_vertex3f(plantilla_sin_rep[j].x,0,0));
-                double a = R*cos(ang*i);
-                double b = R*sin(ang*i);
-                Vertices[p] = _vertex3f(plantilla_sin_rep[j].x,a,b);
-                    }
-            break;
-            case eje::EJE_Y:
-                for(int i = 0; i < nr;i++)
-                    for(int j = 0;j<nv_sinrep;j++,p++){
-                double R = Distancia(plantilla_sin_rep[j],_vertex3f(0,plantilla_sin_rep[j].y,0));
-                double a = R*cos(ang*i);
-                double b = R*sin(ang*i);
-                Vertices[p] = _vertex3f(a,plantilla_sin_rep[j].y,b);
-                    }
-            break;
-            case eje::EJE_Z:
-                for(int i = 0; i < nr;i++)
-                    for(int j = 0;j<nv_sinrep;j++,p++){
-                        double R = Distancia(plantilla_sin_rep[j],_vertex3f(0,0,plantilla_sin_rep[j].z));
-                        double a = R*cos(ang*i);
-                        double b = R*sin(ang*i);
-                Vertices[p] = _vertex3f(a,b,plantilla_sin_rep[j].z);
-                    }
-            break;
-
-        }
-    
+                double R = Distancia(plantilla_sin_rep[j], _vertex3f(plantilla_sin_rep[j].x, 0, 0));
+                double a = R * cos(ang * i);
+                double b = R * sin(ang * i);
+                Vertices[p] = _vertex3f(plantilla_sin_rep[j].x, a, b);
+            }
+        break;
+    case eje::EJE_Y:
+        for (int i = 0; i < nr; i++)
+            for (int j = 0; j < nv_sinrep; j++, p++)
+            {
+                double R = Distancia(plantilla_sin_rep[j], _vertex3f(0, plantilla_sin_rep[j].y, 0));
+                double a = R * cos(ang * i);
+                double b = R * sin(ang * i);
+                Vertices[p] = _vertex3f(a, plantilla_sin_rep[j].y, b);
+            }
+        break;
+    case eje::EJE_Z:
+        for (int i = 0; i < nr; i++)
+            for (int j = 0; j < nv_sinrep; j++, p++)
+            {
+                double R = Distancia(plantilla_sin_rep[j], _vertex3f(0, 0, plantilla_sin_rep[j].z));
+                double a = R * cos(ang * i);
+                double b = R * sin(ang * i);
+                Vertices[p] = _vertex3f(a, b, plantilla_sin_rep[j].z);
+            }
+        break;
+    }
 
     //Ahora el vertice de la tapa y el de la zona baja los podemos encontrar solo en v, y en el vector de vértices no los tenemos
     //Los añadimos ahora
 
+    //Si es una esfera, cierro la plantilla, haciendo que tenga 2 tapas ( dos vértices en el eje).
+    if (o == objeto::SPHERE_P)
+        Vertices[Vertices.size() - 1] = (v[0] * -1);
 
-    //Número de vértices de la plantilla
-    int n_vertices = v.size();
-    int nt = n_tapas(v,e);
-
-    if(nt==3){
+    if (nt == DOS_TP)
+    {
         Vertices[p] = v[0];
-        Vertices[p+1] = v[n_vertices-1];
-    }else if(nt == 2)
+        Vertices[p + 1] = v[n_vertices - 1];
+    }
+    else if (nt == TP_INF)
         Vertices[p] = v[0];
-    else if(nt==1)
-        Vertices[p] = v[n_vertices-1];
-
+    else if (nt == TP_SUP)
+        Vertices[p] = v[n_vertices - 1];
 }
+/////////////////////////////////////////////////////////
+int _revolution::n_tapas(vector<_vertex3f> v, eje e)
+{
+    int nt = 0;
+    if (dentro_eje(v[0], e) && dentro_eje(v[v.size() - 1], e))
+        nt = DOS_TP;
+    else if (dentro_eje(v[0], e))
+        nt = TP_INF;
+    else if (dentro_eje(v[v.size() - 1], e))
+        nt = TP_SUP;
 
-//Nos dice cuantas tapas tiene nuestro perfil.
-//Devuelve un entero que indica:
-//  -3 -> tiene tapa superior e inferior.
-//  -2 -> Tiene tapa inferior
-//  -1 -> Tiene tapa superior
-
-int _revolution::n_tapas(vector<_vertex3f> v,eje e)
-{   
-    int nt=0;
+    return nt;
+}
+/////////////////////////////////////////////////////////
+bool _revolution::dentro_eje(_vertex3f p, eje e)
+{
+    bool dentro = false;
 
     switch (e)
     {
     case eje::EJE_X:
-
-
-      if(v[0].z==0 && v[v.size()-1].z==0 && v[0].y==0 && v[v.size()-1].y==0)
-        nt=3;
-    else if(v[0].z==0  && v[0].y==0)
-        nt=2;
-    else if(v[v.size()-1].y==0 && v[v.size()-1].z==0)
-        nt = 1;
-    break;
-        
+        if (p.y == 0 && p.z == 0)
+            dentro = true;
+        break;
 
     case eje::EJE_Y:
-
-    if(v[0].z==0 && v[v.size()-1].z==0 && v[0].x==0 && v[v.size()-1].x==0)
-        nt=3;
-    else if(v[0].z==0  && v[0].x==0)
-        nt=2;
-    else if(v[v.size()-1].x==0 && v[v.size()-1].z==0)
-        nt = 1;
-    break;
-
+        if (p.x == 0 && p.z == 0)
+            dentro = true;
+        break;
     case eje::EJE_Z:
-
-    if(v[0].y==0 && v[v.size()-1].y==0 && v[0].x==0 && v[v.size()-1].x==0)
-        nt=3;
-    else if(v[0].y==0  && v[0].x==0)
-        nt=2;
-    else if(v[v.size()-1].x==0 && v[v.size()-1].y==0)
-        nt = 1;
-
-    break;
+        if (p.x == 0 && p.y == 0)
+            dentro = true;
+        break;
     }
-
-    return nt;
+    return dentro;
 }
-
-
-
+/////////////////////////////////////////////////////////
 float _revolution::Distancia(_vertex3f p1, _vertex3f p2)
 {
-    return sqrt(pow(p1.x -p2.x,2)+pow(p1.y -p2.y,2)+pow(p1.z -p2.z,2));
+    return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2) + pow(p1.z - p2.z, 2));
 }
-
