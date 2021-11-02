@@ -611,4 +611,6 @@ void _gl_widget::initializeGL()
   factor_rot = 0;
   factor_trasY = 0;
   factor_trasX = 0;
+
+
 }

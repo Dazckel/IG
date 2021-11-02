@@ -72,6 +72,11 @@ public:
   void draw_axis();
   void draw_objects();
 
+
+  _gl_widget_ne::_motion motion;
+    bool Draw_model;
+
+
 protected:
   void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
   void paintGL() Q_DECL_OVERRIDE;
@@ -93,8 +98,6 @@ private:
   _jauria jauria;
 
   _gl_widget_ne::_object Object;
-  _gl_widget_ne::_motion motion;
-
   bool Draw_point;
   bool Draw_line;
   bool Draw_fill;
@@ -108,7 +111,7 @@ private:
 
 
 
-  bool Draw_model;
+
 
   float Observer_angle_x;
   float Observer_angle_y;
