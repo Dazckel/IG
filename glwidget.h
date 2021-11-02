@@ -45,7 +45,9 @@ namespace _gl_widget_ne {
   typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_CONE,OBJECT_CYLINDER,OBJECT_SPHERE,OBJECT_PLY,OBJECT_PERRO} _object;
 
   //
-  typedef enum {AUM_TRASY,DIS_TRASY,AUM_TRAS,DIS_TRAS,AUM_ROT,DIS_ROT,ESTATICO,ESTIRAR_PATA,CONTRAER_PATA,CONTRAER_DEL,CONTRAER_TRA,EXTENDER_DEL,EXTENDER_TRA,RUN,AUM_EST,AUM_CONT,AUM_ESTD,AUM_CONTD,AUM_ESTT,AUM_CONTT} _motion;
+  typedef enum {O1,O2,O3,O4,O5,O6,IDLE} _motion;
+
+  typedef enum {QUIETO,MOVIMIENTO,PARAMETROS,POSICION,ANIMACION} _opciones;
 
   typedef enum {F1,F2,F3,F4,F5} _fases;
 }
@@ -74,6 +76,7 @@ public:
 
 
   _gl_widget_ne::_motion motion;
+  _gl_widget_ne::_opciones opcion;
     bool Draw_model;
 
 
@@ -98,6 +101,7 @@ private:
   _jauria jauria;
 
   _gl_widget_ne::_object Object;
+  _gl_widget_ne::_opciones TMP;
   bool Draw_point;
   bool Draw_line;
   bool Draw_fill;

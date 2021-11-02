@@ -80,82 +80,61 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
   //
   case Qt::Key_Q:
-    motion = _motion::ESTIRAR_PATA;
+    motion = _motion::O1;
     break;
   case Qt::Key_W:
-    motion = _motion::CONTRAER_PATA;
-    break;
-  case Qt::Key_S:
-    motion = _motion::CONTRAER_DEL;
-    break;
-  case Qt::Key_D:
-    motion = _motion::EXTENDER_DEL;
-    break;
-  case Qt::Key_Z:
-    motion = _motion::CONTRAER_TRA;
-    break;
-  case Qt::Key_X:
-    motion = _motion::EXTENDER_TRA;
-    break;
-  case Qt::Key_A:
-    motion = _motion::RUN;
+    motion = _motion::O2;
     break;
   case Qt::Key_E:
-    motion = _motion::AUM_EST;
+    motion = _motion::O3;
     break;
   case Qt::Key_R:
-    motion = _motion::AUM_CONT;
+    motion = _motion::O4;
     break;
   case Qt::Key_T:
-    motion = _motion::AUM_ESTD;
+    motion = _motion::O5;
     break;
   case Qt::Key_Y:
-    motion = _motion::AUM_CONTD;
-    break;
-  case Qt::Key_U:
-    motion = _motion::AUM_ESTT;
-    break;
-  case Qt::Key_I:
-    motion = _motion::AUM_CONTT;
-    break;
-  case Qt::Key_G:
-    motion = _motion::AUM_TRAS;
-    break;
-  case Qt::Key_H:
-    motion = _motion::DIS_TRAS;
-    break;
-  case Qt::Key_V:
-    motion = _motion::AUM_TRASY;
-    break;
-  case Qt::Key_B:
-    motion = _motion::DIS_TRASY;
-    break;
-  case Qt::Key_J:
-    motion = _motion::AUM_ROT;
-    break;
-  case Qt::Key_K:
-    motion = _motion::DIS_ROT;
+    motion = _motion::O6;
     break;
 
     //
 
   case Qt::Key_Left:
+    TMP = opcion;
+    opcion = _gl_widget_ne::_opciones::QUIETO;
     Observer_angle_y -= ANGLE_STEP;
+    opcion = TMP;
     break;
   case Qt::Key_Right:
+    TMP = opcion;
+    opcion = _gl_widget_ne::_opciones::QUIETO;
     Observer_angle_y += ANGLE_STEP;
+    opcion = TMP;
     break;
   case Qt::Key_Up:
+    TMP = opcion;
+    opcion = _gl_widget_ne::_opciones::QUIETO;
     Observer_angle_x -= ANGLE_STEP;
+    opcion = TMP;
     break;
   case Qt::Key_Down:
+    TMP = opcion;
+    opcion = _gl_widget_ne::_opciones::QUIETO;
     Observer_angle_x += ANGLE_STEP;
+    opcion = TMP;
     break;
   case Qt::Key_PageUp:
+    TMP = opcion;
+    opcion = _gl_widget_ne::_opciones::QUIETO;
     Observer_distance *= 1.2;
+    opcion = TMP;
     break;
   case Qt::Key_PageDown:
+    TMP = opcion;
+    opcion = _gl_widget_ne::_opciones::QUIETO;
     Observer_distance /= 1.2;
+    opcion = TMP;
     break;
   }
 
@@ -252,7 +231,7 @@ void _gl_widget::idle()
       traseras++;
       cuerpo_rot -= 1;
 
-      factor_trasY +=0.022;
+      factor_trasY += 0.022;
     }
     else
       F = _fases::F4;
@@ -265,7 +244,7 @@ void _gl_widget::idle()
 
       traseras++;
       cuerpo_rot -= 1;
-      factor_trasY -=0.022;
+      factor_trasY -= 0.022;
     }
     else
       F = _fases::F5;
@@ -278,7 +257,7 @@ void _gl_widget::idle()
 
       traseras--;
       cuerpo_rot += 1;
-      factor_trasY -=0.022;
+      factor_trasY -= 0.022;
     }
     else
       F = _fases::F1;
@@ -317,6 +296,9 @@ void _gl_widget::draw_objects()
     case OBJECT_PLY:
       Ply.draw_point();
       break;
+    case OBJECT_PERRO:
+      jauria.Draw_xxx(0, 0, 0, 0, 0, 0);
+      break;
 
     default:
       break;
@@ -348,7 +330,9 @@ void _gl_widget::draw_objects()
     case OBJECT_PLY:
       Ply.draw_line();
       break;
-
+    case OBJECT_PERRO:
+      jauria.Draw_xxx(0, 0, 0, 0, 0, 0);
+      break;
     default:
       break;
     }
@@ -378,7 +362,9 @@ void _gl_widget::draw_objects()
     case OBJECT_PLY:
       Ply.draw_fill();
       break;
-
+    case OBJECT_PERRO:
+      jauria.Draw_xxx(0, 0, 0, 0, 0, 0);
+      break;
     default:
       break;
     }
@@ -408,7 +394,9 @@ void _gl_widget::draw_objects()
     case OBJECT_PLY:
       Ply.draw_chess();
       break;
-
+    case OBJECT_PERRO:
+      jauria.Draw_xxx(0, 0, 0, 0, 0, 0);
+      break;
     default:
       break;
     }
@@ -419,114 +407,138 @@ void _gl_widget::draw_objects()
 
     glColor3fv((GLfloat *)&RED);
 
-    switch (motion)
+    switch (opcion)
     {
-    case _gl_widget_ne::_motion::ESTIRAR_PATA:
 
-      if (delanteras < 90 && traseras < 90)
+    case _gl_widget_ne::_opciones::MOVIMIENTO:
+      switch (motion)
       {
-        delanteras += factor_delanteras;
-        traseras += factor_traseras;
+
+      case _gl_widget_ne::_motion::O1:
+        if (delanteras < 90 && traseras < 90)
+        {
+          delanteras += factor_delanteras;
+          traseras += factor_traseras;
+        }
+        break;
+
+      case _gl_widget_ne::_motion::O2:
+        if (delanteras > -90 && traseras > -90)
+        {
+          delanteras -= factor_delanteras;
+          traseras -= factor_traseras;
+        }
+        break;
+
+      case _gl_widget_ne::_motion::O3:
+        if (delanteras > -90 && cuerpo_rot > -90)
+        {
+          delanteras -= factor_delanteras;
+          cuerpo_rot -= factor_delanteras;
+        }
+        break;
+      case _gl_widget_ne::_motion::O4:
+        if (traseras > -90 && cuerpo_rot < 90)
+        {
+          traseras -= factor_traseras;
+          cuerpo_rot += factor_traseras;
+        }
+        break;
+
+      case _gl_widget_ne::_motion::O5:
+        if (delanteras < 90 && cuerpo_rot < 90)
+        {
+          delanteras += factor_delanteras;
+          cuerpo_rot += factor_delanteras;
+        }
+        break;
+      case _gl_widget_ne::_motion::O6:
+        if (traseras < 90 && cuerpo_rot > -90)
+        {
+          traseras += factor_traseras;
+          cuerpo_rot -= factor_traseras;
+        }
+        break;
       }
       break;
 
-    case _gl_widget_ne::_motion::CONTRAER_PATA:
-      if (delanteras > -90 && traseras > -90)
+    case _gl_widget_ne::_opciones::PARAMETROS:
+      switch (motion)
       {
-        delanteras -= factor_delanteras;
-        traseras -= factor_traseras;
+      case _gl_widget_ne::_motion::O1:
+
+        factor_delanteras++;
+        factor_traseras++;
+
+        break;
+      case _gl_widget_ne::_motion::O2:
+        if (factor_delanteras > 0 && factor_traseras > 0)
+        {
+          factor_delanteras--;
+          factor_traseras--;
+        }
+        break;
+      case _gl_widget_ne::_motion::O3:
+        factor_delanteras++;
+        cuerpo_rot++;
+        break;
+      case _gl_widget_ne::_motion::O4:
+        if (factor_delanteras > 0){
+          factor_delanteras--;
+          cuerpo_rot--;
+        }
+        break;
+      case _gl_widget_ne::_motion::O5:
+        factor_traseras++;
+        cuerpo_rot++;
+        break;
+      case _gl_widget_ne::_motion::O6:
+        if (factor_traseras > 0){
+          factor_traseras--;
+          cuerpo_rot--;
+        }
+        break;
       }
       break;
 
-    case _gl_widget_ne::_motion::CONTRAER_DEL:
-      if (delanteras > -90 && cuerpo_rot > -90)
+    case _gl_widget_ne::_opciones::POSICION:
+      switch (motion)
       {
-        delanteras -= factor_delanteras;
-        cuerpo_rot -= factor_delanteras;
-      }
-      break;
-    case _gl_widget_ne::_motion::CONTRAER_TRA:
-      if (traseras > -90 && cuerpo_rot < 90)
-      {
-        traseras -= factor_traseras;
-        cuerpo_rot += factor_traseras;
-      }
-      break;
+      case _gl_widget_ne::_motion::O1:
+        factor_trasX++;
+        break;
+      case _gl_widget_ne::_motion::O2:
+        if (factor_trasX > 0)
+          factor_trasX--;
+        break;
 
-    case _gl_widget_ne::_motion::EXTENDER_DEL:
-      if (delanteras < 90 && cuerpo_rot < 90)
-      {
-        delanteras += factor_delanteras;
-        cuerpo_rot += factor_delanteras;
-      }
-      break;
-    case _gl_widget_ne::_motion::EXTENDER_TRA:
-      if (traseras < 90 && cuerpo_rot > -90)
-      {
-        traseras += factor_traseras;
-        cuerpo_rot -= factor_traseras;
-      }
-      break;
-
-    case _gl_widget_ne::_motion::AUM_EST:
-
-      factor_delanteras++;
-      factor_traseras++;
-
-      break;
-    case _gl_widget_ne::_motion::AUM_CONT:
-      if (factor_delanteras > 0 && factor_traseras > 0)
-      {
-        factor_delanteras--;
-        factor_traseras--;
-      }
-      break;
-    case _gl_widget_ne::_motion::AUM_ESTD:
-      factor_delanteras++;
-      break;
-    case _gl_widget_ne::_motion::AUM_CONTD:
-      if (factor_delanteras > 0)
-        factor_delanteras--;
-      break;
-    case _gl_widget_ne::_motion::AUM_ESTT:
-      factor_traseras++;
-      break;
-    case _gl_widget_ne::_motion::AUM_CONTT:
-      if (factor_traseras > 0)
-        factor_traseras--;
-      break;
-    case _gl_widget_ne::_motion::AUM_TRAS:
-      factor_trasX++;
-      break;
-    case _gl_widget_ne::_motion::DIS_TRAS:
-      if (factor_trasX > 0)
-        factor_trasX--;
-      break;
-
-    case _gl_widget_ne::_motion::AUM_TRASY:
-      factor_trasY++;
-      break;
-    case _gl_widget_ne::_motion::DIS_TRASY:
-      if (factor_trasY > 0)
-        factor_trasY--;
-      break;
-    case _gl_widget_ne::_motion::AUM_ROT:
-      factor_rot++;
-      break;
-    case _gl_widget_ne::_motion::DIS_ROT:
+      case _gl_widget_ne::_motion::O3:
+        factor_trasY++;
+        break;
+      case _gl_widget_ne::_motion::O4:
+        if (factor_trasY > 0)
+          factor_trasY--;
+        break;
+      case _gl_widget_ne::_motion::O5:
+        factor_rot++;
+        break;
+      case _gl_widget_ne::_motion::O6:
         factor_rot--;
+        break;
+      }
       break;
 
-    case _gl_widget_ne::_motion::RUN:
+    case _gl_widget_ne::_opciones::ANIMACION:
 
       QTimer *timer = new QTimer(this);
       connect(timer, SIGNAL(timeout()), this, SLOT(idle()));
       timer->start(30);
+      opcion = _gl_widget_ne::_opciones::QUIETO;
       break;
+ 
     }
-
-    jauria.Draw_xxx(delanteras, traseras, cuerpo_rot,factor_trasX,factor_trasY,factor_rot);
-    motion = _gl_widget_ne::_motion::ESTATICO;
+    motion = _gl_widget_ne::_motion::IDLE;
+    jauria.Draw_xxx(delanteras, traseras, cuerpo_rot, factor_trasX, factor_trasY, factor_rot);
   }
 }
 
@@ -611,6 +623,4 @@ void _gl_widget::initializeGL()
   factor_rot = 0;
   factor_trasY = 0;
   factor_trasX = 0;
-
-
 }
