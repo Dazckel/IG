@@ -12,7 +12,10 @@ public:
     _perro();
     _aux2 aux2;
     _aux3 aux3;
-    void Draw_xxx(float factor,bool dp,bool dn,bool tp,bool tn);
+    _sphere cabeza;
+    void Draw_xxx(float delanteras,float traseras,float cuerpo_rot);
+
+    void idle(int d, int t, int c);
 };
 
 #endif // aux_H

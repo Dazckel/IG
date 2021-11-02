@@ -105,22 +105,3 @@ void _object3D::draw_chess()
   glEnd();
 
 }
-/*
-void _object3D::mover(_vertex3f vt){
-
-  int n_puntos = Vertices.size();
-
-  for(int i = 0; i < n_puntos;i++)
-  {
-    Vertices[i].x += vt.x;
-    Vertices[i].y += vt.y;
-    Vertices[i].z += vt.z;
-  }
-}
-
-
-void _object3D::ampliar(_vertex3f v)
-{
-
-}
-*/

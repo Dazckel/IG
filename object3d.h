@@ -28,8 +28,6 @@ class _object3D:public _basic_object3D
   void draw_line();
   void draw_fill();
   void draw_chess();
- // void mover(_vertex3f vt);
-  //void ampliar(_vertex3f v);
 
 };
 

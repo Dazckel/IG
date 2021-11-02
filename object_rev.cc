@@ -125,10 +125,8 @@ void _revolution::RotarVertices(vector<_vertex3f> v, int nr, eje e, objeto o)
 
     //Si es una esfera,rotamos media circunferencia para obtener la plantilla.
     if (o == objeto::SPHERE_P)
-    {
         ang = M_PI / nr;
-        tamanio++;
-    }
+
     //Tamaño total que tendrá el vector de vértices: vertices que rotan + los que no
     Vertices.resize(tamanio);
     int p = 0;
@@ -175,7 +173,7 @@ void _revolution::RotarVertices(vector<_vertex3f> v, int nr, eje e, objeto o)
 
     //Si es una esfera, cierro la plantilla, haciendo que tenga 2 tapas ( dos vértices en el eje).
     if (o == objeto::SPHERE_P)
-        Vertices[Vertices.size() - 1] = (v[0] * -1);
+        Vertices.push_back(v[0] * -1);
 
     if (nt == DOS_TP)
     {
