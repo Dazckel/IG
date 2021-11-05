@@ -182,62 +182,63 @@ void _gl_widget::change_observer()
  *
  *
  *****************************************************************************/
-/*
+
 void _gl_widget::idle()
 {
 
   switch (F)
   {
   case _fases::F1:
-    if (delanteras > -45)
+    if (fac_lv4d_1d < 90)
     {
-      delanteras--;
-      cuerpo_rot -= 1;
+      fac_lv4d_1d++;
+      fac_lv4d_2d+=0.1;
+      fac_lv3_1d--;
     }
     else
       F = _fases::F2;
     break;
 
   case _fases::F2:
-    if (delanteras < 0 && traseras > -45)
+    if (fac_lv4t_1d >- 90)
     {
-      delanteras++;
-      cuerpo_rot += 1;
-
-      traseras--;
-      cuerpo_rot += 1;
+      fac_lv4t_1d--;
+      fac_lv4d_2d-=0.1;
+      fac_lv4d_1d--;
+      fac_lv3_1d++;
+      fac_lv4t_2d+=0.1;
     }
     else
       F = _fases::F3;
 
-    break;
+   break;
   case _fases::F3:
-    if (delanteras < 90 && traseras < 45)
+    if (fac_lv4d_1d > -60)
     {
-      delanteras++;
-      cuerpo_rot += 1;
+      fac_lv4d_1d--;
+      fac_lv3_1d--;
+      fac_lv4t_1d+=2.5;
 
-      traseras++;
-      cuerpo_rot -= 1;
 
-      factor_trasY += 0.022;
     }
     else
-      F = _fases::F4;
+      F = _fases::F1;
     break;
-  case _fases::F4:
-    if (delanteras > 45 && traseras < 90)
-    {
-      delanteras--;
-      cuerpo_rot -= 1;
 
-      traseras++;
-      cuerpo_rot -= 1;
-      factor_trasY -= 0.022;
+
+/*  case _fases::F4:
+    if (fac_lv4d_1d > -90)
+    {
+
+      fac_lv4t_1d-=2.5;
+      
+
     }
     else
       F = _fases::F5;
     break;
+
+/*
   case _fases::F5:
     if (delanteras > -45 && traseras > 0)
     {
@@ -250,12 +251,12 @@ void _gl_widget::idle()
     }
     else
       F = _fases::F1;
-    break;
+    break;*/
   }
 
   update();
 }
-*/
+
 void _gl_widget::draw_objects()
 {
   Axis.draw_line();
@@ -490,13 +491,13 @@ void _gl_widget::draw_objects()
       }
       break;
 
-      /* case _gl_widget_ne::_opciones::ANIMACION:
+      case _gl_widget_ne::_motion::ANIMACION:
 
       QTimer *timer = new QTimer(this);
       connect(timer, SIGNAL(timeout()), this, SLOT(idle()));
       timer->start(30);
-      opcion = _gl_widget_ne::_opciones::QUIETO;
-      break;*/
+      motion = _gl_widget_ne::_motion::ESTATICO;
+      break;
     }
     opcion = _gl_widget_ne::_opciones::IDLE;
     perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d,fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d);

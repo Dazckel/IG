@@ -26,7 +26,7 @@
 #include "cylinder.h"
 #include "sphere.h"
 #include "object_ply.h"
-#include "perro.h"
+#include "perro_volador.h"
 
 
 namespace _gl_widget_ne {
@@ -44,7 +44,7 @@ namespace _gl_widget_ne {
   typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_CONE,OBJECT_CYLINDER,OBJECT_SPHERE,OBJECT_PLY,OBJECT_PERRO} _object;
 
   //
-  typedef enum {LEVEL_3,LEVEL_4,LEVEL_5,ESTATICO} _motion;
+  typedef enum {LEVEL_3,LEVEL_4,LEVEL_5,ESTATICO,ANIMACION} _motion;
 
   typedef enum {INC_1,DEC_1,INC_2,DEC_2,IDLE,INC_1t,DEC_1t,INC_2t,DEC_2t} _opciones;
 
@@ -86,7 +86,7 @@ protected:
   void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
 
 public slots:
-  //void idle();
+  void idle();
 
 private:
   _window *Window;
@@ -97,7 +97,7 @@ private:
   _cylinder Cylinder;
   _sphere Sphere;
   _ply Ply;
-  _perro perro;
+  _perro_volador perro;
 
   _gl_widget_ne::_object Object;
   bool Draw_point;
