@@ -8,7 +8,6 @@
 
 #include "glwidget.h"
 #include "window.h"
-#include <QTimer>
 
 using namespace std;
 using namespace _gl_widget_ne;
@@ -61,10 +60,6 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
     Object = OBJECT_PERRO;
     break;
 
-  //
-  case Qt::Key_M:
-    Draw_model = !Draw_model;
-    break;
   case Qt::Key_P:
     Draw_point = !Draw_point;
     break;
@@ -80,31 +75,43 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 
   //
   case Qt::Key_Q:
-    opcion = _gl_widget_ne::_opciones::INC_1;
+    opcion = _gl_widget_ne::_opciones::OP1;
     break;
   case Qt::Key_W:
-    opcion = _gl_widget_ne::_opciones::DEC_1;
+    opcion = _gl_widget_ne::_opciones::OP2;
     break;
   case Qt::Key_E:
-    opcion = _gl_widget_ne::_opciones::INC_2;
+    opcion = _gl_widget_ne::_opciones::OP3;
     break;
   case Qt::Key_R:
-    opcion = _gl_widget_ne::_opciones::DEC_2;
-    break;
-/// traseras
-  case Qt::Key_T:
-    opcion = _gl_widget_ne::_opciones::INC_1t;
-    break;
-  case Qt::Key_Y:
-    opcion = _gl_widget_ne::_opciones::DEC_1t;
-    break;
-  case Qt::Key_U:
-    opcion = _gl_widget_ne::_opciones::INC_2t;
-    break;
-  case Qt::Key_I:
-    opcion = _gl_widget_ne::_opciones::DEC_2t;
+    opcion = _gl_widget_ne::_opciones::OP4;
     break;
 
+  case Qt::Key_T:
+    opcion = _gl_widget_ne::_opciones::OP5;
+    break;
+  case Qt::Key_Y:
+    opcion = _gl_widget_ne::_opciones::OP6;
+    break;
+  case Qt::Key_U:
+    opcion = _gl_widget_ne::_opciones::OP7;
+    break;
+  case Qt::Key_I:
+    opcion = _gl_widget_ne::_opciones::OP8;
+    break;
+
+  case Qt::Key_A:
+    opcion = _gl_widget_ne::_opciones::OP9;
+    break;
+  case Qt::Key_S:
+    opcion = _gl_widget_ne::_opciones::OP10;
+    break;
+  case Qt::Key_Z:
+    opcion = _gl_widget_ne::_opciones::OP11;
+    break;
+  case Qt::Key_X:
+    opcion = _gl_widget_ne::_opciones::OP12;
+    break;
     //
 
   case Qt::Key_Left:
@@ -185,73 +192,82 @@ void _gl_widget::change_observer()
 
 void _gl_widget::idle()
 {
+  float fa = (9.0 / 60.0);
 
   switch (F)
   {
+
   case _fases::F1:
     if (fac_lv4d_1d < 90)
     {
-      fac_lv4d_1d++;
-      fac_lv4d_2d+=0.1;
-      fac_lv3_1d--;
+      fac_lv4d_1d += gr3 * 1;
+      if (fac_lv4d_2d < 9)
+        fac_lv4d_2d += 0.1 * gr4;
+      if (fac_lv3_1d > -90)
+        fac_lv3_1d -= 1 * gr1;
     }
     else
       F = _fases::F2;
     break;
 
   case _fases::F2:
-    if (fac_lv4t_1d >- 90)
+    if (fac_lv4t_1d > -90)
     {
-      fac_lv4t_1d--;
-      fac_lv4d_2d-=0.1;
-      fac_lv4d_1d--;
-      fac_lv3_1d++;
-      fac_lv4t_2d+=0.1;
+      fac_lv4t_1d -= 1 * gr3;
+      if (fac_lv4d_2d > 0)
+        fac_lv4d_2d -= 0.1 * gr4;
+      if (fac_lv4d_1d > 0)
+        fac_lv4d_1d -= 1 * gr3;
+      if (fac_lv3_1d < 0)
+        fac_lv3_1d += 1 * gr1;
+      if (fac_lv4t_2d < 9)
+        fac_lv4t_2d += 0.1 * gr4;
+      if (fac_lv3_2d < 4.5)
+        fac_lv3_2d += 0.05 * gr2;
     }
     else
       F = _fases::F3;
 
-   break;
+    break;
   case _fases::F3:
     if (fac_lv4d_1d > -60)
     {
-      fac_lv4d_1d--;
-      fac_lv3_1d--;
-      fac_lv4t_1d+=2.5;
-
-
+      fac_lv4d_1d -= 1 * gr3;
+      if (fac_lv5_1d < 90)
+        fac_lv5_1d += 1.5 * gr5;
+      if (fac_lv3_1d > -60)
+        fac_lv3_1d -= 1 * gr1;
+      if (fac_lv4t_1d < 60)
+        fac_lv4t_1d += 2.5 * gr3;
+      if (fac_lv3_2d > 0)
+        fac_lv3_2d -= 0.075 * gr2;
+      if (fac_lv5_2d < 4.5)
+        fac_lv5_2d += 0.075 * gr6;
     }
     else
-      F = _fases::F1;
+      F = _fases::F4;
     break;
 
-
-/*  case _fases::F4:
-    if (fac_lv4d_1d > -90)
+  case _fases::F4:
+    if (fac_lv4t_1d > 0)
     {
-
-      fac_lv4t_1d-=2.5;
-      
-
+      fac_lv4t_1d -= 1 * gr3;
+      if (fac_lv3_1d > -90)
+        fac_lv3_1d -= 0.5 * gr1;
+      if (fac_lv4d_1d < 90)
+        fac_lv4d_1d += 2.5 * gr3;
+      if (fac_lv4t_2d >0)
+        fac_lv4t_2d -= fa * gr4;
+      if (fac_lv4d_2d < 9)
+        fac_lv4d_2d += fa * gr4;
+      if (fac_lv5_1d >0)
+        fac_lv5_1d -= 1.5 * gr5;
+      if (fac_lv5_2d > 0)
+        fac_lv5_2d -= 0.075 * gr6;
     }
     else
-      F = _fases::F5;
+      F = _fases::F2;
     break;
-
-/*
-  case _fases::F5:
-    if (delanteras > -45 && traseras > 0)
-    {
-      delanteras--;
-      cuerpo_rot -= 1;
-
-      traseras--;
-      cuerpo_rot += 1;
-      factor_trasY -= 0.022;
-    }
-    else
-      F = _fases::F1;
-    break;*/
   }
 
   update();
@@ -287,10 +303,7 @@ void _gl_widget::draw_objects()
       Ply.draw_point();
       break;
     case OBJECT_PERRO:
-      perro.Draw_xxx(0, 0, 0, 0, 0, 0,0,0);
-      break;
-
-    default:
+      draw_model(_draw_modes::POINTS);
       break;
     }
   }
@@ -321,9 +334,7 @@ void _gl_widget::draw_objects()
       Ply.draw_line();
       break;
     case OBJECT_PERRO:
-      perro.Draw_xxx(0, 0, 0, 0, 0, 0,0,0);
-      break;
-    default:
+      draw_model(_draw_modes::LINES);
       break;
     }
   }
@@ -353,9 +364,7 @@ void _gl_widget::draw_objects()
       Ply.draw_fill();
       break;
     case OBJECT_PERRO:
-      perro.Draw_xxx(0, 0, 0, 0, 0, 0,0,0);
-      break;
-    default:
+      draw_model(_draw_modes::FILL);
       break;
     }
   }
@@ -385,122 +394,9 @@ void _gl_widget::draw_objects()
       Ply.draw_chess();
       break;
     case OBJECT_PERRO:
-      perro.Draw_xxx(0, 0, 0, 0, 0, 0,0,0);
-      break;
-    default:
+      draw_model(_draw_modes::CHESS);
       break;
     }
-  }
-
-  if (Draw_model)
-  {
-
-    glColor3fv((GLfloat *)&RED);
-
-    switch (motion)
-    {
-
-    case _gl_widget_ne::_motion::LEVEL_3:
-      switch (opcion)
-      {
-
-      case _gl_widget_ne::_opciones::INC_1:
-        if (fac_lv3_1d < 0)
-          fac_lv3_1d++;
-        break;
-
-      case _gl_widget_ne::_opciones::DEC_1:
-        if (fac_lv3_1d > -90)
-          fac_lv3_1d--;
-        break;
-
-      case _gl_widget_ne::_opciones::INC_2:
-        fac_lv3_2d++;
-        break;
-      case _gl_widget_ne::_opciones::DEC_2:
-        fac_lv3_2d--;
-        break;
-      }
-      break;
-
-    case _gl_widget_ne::_motion::LEVEL_4:
-      switch (opcion)
-      {
-
-      case _gl_widget_ne::_opciones::INC_1:
-        if (fac_lv4d_1d < 90)
-          fac_lv4d_1d++;
-        break;
-
-      case _gl_widget_ne::_opciones::DEC_1:
-        if (fac_lv4d_1d > -90)
-          fac_lv4d_1d--;
-        break;
-
-      case _gl_widget_ne::_opciones::INC_2:
-        if(fac_lv4d_2d < 45 && ( fac_lv4d_2d - fac_lv4t_2d  )  < 45)
-          fac_lv4d_2d++;
-        break;
-      case _gl_widget_ne::_opciones::DEC_2:
-        if(fac_lv4d_2d >-45  && ( fac_lv4d_2d - fac_lv4t_2d  )  >- 45)
-          fac_lv4d_2d--;
-        break;
-
-
-//TRASERAS
-
-      case _gl_widget_ne::_opciones::INC_1t:
-        if (fac_lv4t_1d < 90)
-          fac_lv4t_1d++;
-        break;
-
-      case _gl_widget_ne::_opciones::DEC_1t:
-        if (fac_lv4t_1d > -90)
-          fac_lv4t_1d--;
-        break;
-
-      case _gl_widget_ne::_opciones::INC_2t:
-        if(fac_lv4t_2d < 45 && ( fac_lv4t_2d - fac_lv4d_2d  )  < 45)
-          fac_lv4t_2d++;
-        break;
-      case _gl_widget_ne::_opciones::DEC_2t:
-        if(fac_lv4t_2d >-45  && ( fac_lv4t_2d - fac_lv4d_2d  )  >- 45)
-          fac_lv4t_2d--;
-        break;
-      }
-      break;
-
-    case _gl_widget_ne::_motion::LEVEL_5:
-      switch (opcion)
-      {
-
-      case _gl_widget_ne::_opciones::INC_1:
-        fac_lv5_1d++;
-        break;
-
-      case _gl_widget_ne::_opciones::DEC_1:
-        fac_lv5_1d--;
-        break;
-
-      case _gl_widget_ne::_opciones::INC_2:
-        fac_lv5_2d++;
-        break;
-      case _gl_widget_ne::_opciones::DEC_2:
-        fac_lv5_2d--;
-        break;
-      }
-      break;
-
-      case _gl_widget_ne::_motion::ANIMACION:
-
-      QTimer *timer = new QTimer(this);
-      connect(timer, SIGNAL(timeout()), this, SLOT(idle()));
-      timer->start(30);
-      motion = _gl_widget_ne::_motion::ESTATICO;
-      break;
-    }
-    opcion = _gl_widget_ne::_opciones::IDLE;
-    perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d,fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d);
   }
 }
 
@@ -573,8 +469,7 @@ void _gl_widget::initializeGL()
   Draw_line = false;
   Draw_fill = false;
   Draw_chess = false;
-
-  Draw_model = false;
+  animacion = false;
 
   fac_lv3_1d = 0;
   fac_lv3_2d = 0;
@@ -584,4 +479,200 @@ void _gl_widget::initializeGL()
   fac_lv4t_2d = 0;
   fac_lv5_1d = 0;
   fac_lv5_2d = 0;
+
+  gr1 = 1;
+  gr2 = 1;
+  gr3 = 1;
+  gr4 = 1;
+  gr5 = 1;
+  gr6 = 1;
+
+  F = _fases::F1;
+  motion = _motion::ESTATICO;
+  opcion = _opciones::IDLE;
+
+  timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(idle()));
+}
+
+void _gl_widget::draw_model(_draw_modes dm)
+{
+  switch (motion)
+  {
+  case _gl_widget_ne::_motion::LEVEL_3:
+    switch (opcion)
+    {
+
+    case _gl_widget_ne::_opciones::OP1:
+      if (fac_lv3_1d < 0)
+        fac_lv3_1d += gr1;
+      break;
+
+    case _gl_widget_ne::_opciones::OP2:
+      if (fac_lv3_1d > -90)
+        fac_lv3_1d -= gr1;
+      break;
+
+    case _gl_widget_ne::_opciones::OP3:
+      fac_lv3_2d += gr2;
+      break;
+    case _gl_widget_ne::_opciones::OP4:
+      if (fac_lv3_2d > 0)
+        fac_lv3_2d -= gr2;
+      break;
+    }
+    break;
+
+  case _gl_widget_ne::_motion::LEVEL_4:
+    switch (opcion)
+    {
+
+    case _gl_widget_ne::_opciones::OP1:
+      if (fac_lv4d_1d < 90)
+        fac_lv4d_1d += gr3;
+      break;
+
+    case _gl_widget_ne::_opciones::OP2:
+      if (fac_lv4d_1d > -90)
+        fac_lv4d_1d -= gr3;
+      break;
+
+    case _gl_widget_ne::_opciones::OP3:
+      if (fac_lv4d_2d < 45 && (fac_lv4d_2d - fac_lv4t_2d) < 45)
+        fac_lv4d_2d += gr4;
+      break;
+    case _gl_widget_ne::_opciones::OP4:
+      if (fac_lv4d_2d > -45 && (fac_lv4d_2d - fac_lv4t_2d) > -45)
+        fac_lv4d_2d -= gr4;
+      break;
+
+      //TRASERAS
+
+    case _gl_widget_ne::_opciones::OP5:
+      if (fac_lv4t_1d < 90)
+        fac_lv4t_1d += gr3;
+      break;
+
+    case _gl_widget_ne::_opciones::OP6:
+      if (fac_lv4t_1d > -90)
+        fac_lv4t_1d -= gr3;
+      break;
+
+    case _gl_widget_ne::_opciones::OP7:
+      if (fac_lv4t_2d < 45 && (fac_lv4t_2d - fac_lv4d_2d) < 45)
+        fac_lv4t_2d += gr4;
+      break;
+    case _gl_widget_ne::_opciones::OP8:
+      if (fac_lv4t_2d > -45 && (fac_lv4t_2d - fac_lv4d_2d) > -45)
+        fac_lv4t_2d -= gr4;
+      break;
+    }
+    break;
+
+  case _gl_widget_ne::_motion::LEVEL_5:
+    switch (opcion)
+    {
+
+    case _gl_widget_ne::_opciones::OP1:
+      fac_lv5_1d += gr5;
+      break;
+
+    case _gl_widget_ne::_opciones::OP2:
+      fac_lv5_1d -= gr5;
+      break;
+
+    case _gl_widget_ne::_opciones::OP3:
+      fac_lv5_2d += gr6;
+      break;
+    case _gl_widget_ne::_opciones::OP4:
+      if (fac_lv5_2d > 0)
+        fac_lv5_2d -= gr6;
+      break;
+    }
+    break;
+
+    //AUMENTAR RATIO DE CAMBIO DE LOS GRADOS DE LIBERTAD
+  case _gl_widget_ne::_motion::GRADOS:
+
+    switch (opcion)
+    {
+
+    case _gl_widget_ne::_opciones::OP1:
+      gr1++;
+      break;
+
+    case _gl_widget_ne::_opciones::OP2:
+      if (gr1 > 1)
+        gr1--;
+      break;
+
+    case _gl_widget_ne::_opciones::OP3:
+      gr2++;
+      break;
+    case _gl_widget_ne::_opciones::OP4:
+      if (gr2 > 1)
+        gr2--;
+      break;
+
+    case _gl_widget_ne::_opciones::OP5:
+      gr3++;
+      break;
+
+    case _gl_widget_ne::_opciones::OP6:
+      if (gr3 > 1)
+        gr3--;
+      break;
+    case _gl_widget_ne::_opciones::OP7:
+      gr4++;
+      break;
+
+    case _gl_widget_ne::_opciones::OP8:
+      if (gr4 > 1)
+        gr4--;
+      break;
+
+    case _gl_widget_ne::_opciones::OP9:
+      gr5++;
+      break;
+
+    case _gl_widget_ne::_opciones::OP10:
+      if (gr5 > 1)
+        gr5--;
+      break;
+    case _gl_widget_ne::_opciones::OP11:
+      gr6++;
+      break;
+
+    case _gl_widget_ne::_opciones::OP12:
+      if (gr6 > 1)
+        gr6--;
+      break;
+    }
+
+    break;
+
+  case _gl_widget_ne::_motion::ANIMACION:
+    fac_lv3_1d = 0;
+    fac_lv3_2d = 0;
+    fac_lv4d_1d = 0;
+    fac_lv4d_2d = 0;
+    fac_lv4t_1d = 0;
+    fac_lv4t_2d = 0;
+    fac_lv5_1d = 0;
+    fac_lv5_2d = 0;
+
+    timer->start(20);
+    //Una vez activada la animación, volvemos al estado estático, si no se estaria llamando todo el rato
+    motion = _gl_widget_ne::_motion::ESTATICO;
+    animacion = true;
+    break;
+
+  case _gl_widget_ne::_motion::PARAR_ANIMACION:
+    timer->stop();
+    animacion = false;
+    motion = _gl_widget_ne::_motion::ESTATICO;
+    break;
+  }
+  opcion = _gl_widget_ne::_opciones::IDLE;
+  perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, dm);
 }

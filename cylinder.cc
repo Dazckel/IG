@@ -36,5 +36,5 @@ _cylinder::_cylinder()
     }
 
 
-    crear_OR(v,100,e,objeto::CYLINDER);
+    crear_OR(v,10,e,objeto::CYLINDER);
 }

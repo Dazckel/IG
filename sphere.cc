@@ -7,7 +7,7 @@ _sphere::_sphere()
     
     vector<_vertex3f> v;
     v.resize(1);
-    eje e = eje::EJE_Z;
+    eje e = eje::EJE_X;
 
     switch (e)
     {

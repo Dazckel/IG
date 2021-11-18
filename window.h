@@ -37,9 +37,10 @@ public:
 
 public slots:
   void animacion();
-  void Movimiento();
-  void Parametros();
-  void Posicion();
+  void Nivel3();
+  void Nivel4();
+  void Nivel5();
+  void IncrementarRatio();
 
 private:
   _gl_widget *GL_widget;

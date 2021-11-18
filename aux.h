@@ -7,7 +7,7 @@ class _aux
 {
 public:
   _aux();
-  void Draw_xxx();
+  void Draw_xxx(_draw_modes dm);
   _cube Cube;
 };
 

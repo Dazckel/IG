@@ -1,17 +1,14 @@
 #ifndef AUX2_H
 #define AUX2_H
 
-#include "aux.h"
-#include "sphere.h"
-
+#include "cube.h"
 
 class _aux2
 {
 public:
   _aux2();
-  _aux aux;
-  _sphere esfera;
-  void Draw_xxx(float factor);
+  void Draw_xxx(_draw_modes dm);
+  _cube Cube;
 };
 
 #endif // aux_H

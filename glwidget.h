@@ -19,6 +19,7 @@
 #include "axis.h"
 #include "tetrahedron.h"
 #include "cube.h"
+#include <QTimer>
 
 //
 #include "object_rev.h"
@@ -44,11 +45,11 @@ namespace _gl_widget_ne {
   typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_CONE,OBJECT_CYLINDER,OBJECT_SPHERE,OBJECT_PLY,OBJECT_PERRO} _object;
 
   //
-  typedef enum {LEVEL_3,LEVEL_4,LEVEL_5,ESTATICO,ANIMACION} _motion;
+  typedef enum {LEVEL_3,LEVEL_4,LEVEL_5,ESTATICO,ANIMACION,PARAR_ANIMACION,GRADOS} _motion;
 
-  typedef enum {INC_1,DEC_1,INC_2,DEC_2,IDLE,INC_1t,DEC_1t,INC_2t,DEC_2t} _opciones;
+  typedef enum {OP1,OP2,OP3,OP4,IDLE,OP5,OP6,OP7,OP8,OP9,OP10,OP11,OP12} _opciones;
 
-  typedef enum {F1,F2,F3,F4,F5} _fases;
+  typedef enum {F1,F2,F3,F4} _fases;
 }
 
 class _window;
@@ -72,12 +73,12 @@ public:
 
   void draw_axis();
   void draw_objects();
+  void draw_model(_draw_modes dm);
 
 
   _gl_widget_ne::_motion motion;
   _gl_widget_ne::_opciones opcion;
-    bool Draw_model;
-
+  bool animacion;
 
 protected:
   void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -107,8 +108,8 @@ private:
 
   float delanteras;
   float traseras;
-  float cuerpo_rot;
   _gl_widget_ne::_fases F;
+  QTimer *timer;
 
 
 
@@ -127,6 +128,23 @@ private:
   float fac_lv4t_2d;
   float fac_lv5_1d;
   float fac_lv5_2d;
+
+
+//lv3
+  int gr1;
+  int gr2;
+
+//lv4
+  int gr3;
+  int gr4;
+
+//lv5
+  int gr5;
+  int gr6;
+
+
+
+
 };
 
 #endif

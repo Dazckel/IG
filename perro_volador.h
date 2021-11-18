@@ -6,7 +6,8 @@
 class _perro_volador{
     public:
         _perro_volador();
-        void Draw_xxx(float l3_1d,float l3_2d,float l4d_1d,float l4d_2d,float l4t_1d,float l4t_2d,float l5_1d,float l5_2d);
+        void Draw_xxx(float l3_1d,float l3_2d,float l4d_1d,float l4d_2d,float l4t_1d,float l4t_2d,float l5_1d,float l5_2d,_draw_modes dm);
+
         _perro perro;
         _gorrocoptero gorrocoptero;
 };
