@@ -72,6 +72,9 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_C:
     Draw_chess = !Draw_chess;
     break;
+  case Qt::Key_K:
+    Draw_light = !Draw_light;
+    break;
 
   //
   case Qt::Key_Q:
@@ -256,11 +259,11 @@ void _gl_widget::idle()
         fac_lv3_1d -= 0.5 * gr1;
       if (fac_lv4d_1d < 90)
         fac_lv4d_1d += 2.5 * gr3;
-      if (fac_lv4t_2d >0)
+      if (fac_lv4t_2d > 0)
         fac_lv4t_2d -= fa * gr4;
       if (fac_lv4d_2d < 9)
         fac_lv4d_2d += fa * gr4;
-      if (fac_lv5_1d >0)
+      if (fac_lv5_1d > 0)
         fac_lv5_1d -= 1.5 * gr5;
       if (fac_lv5_2d > 0)
         fac_lv5_2d -= 0.075 * gr6;
@@ -368,6 +371,35 @@ void _gl_widget::draw_objects()
       break;
     }
   }
+  if (Draw_light)
+  {
+    glColor3fv((GLfloat *)&BLUE);
+    switch (Object)
+    {
+    case OBJECT_TETRAHEDRON:
+      Tetrahedron.draw_lighted_flat_smooth();
+      break;
+    case OBJECT_CUBE:
+      Cube.draw_lighted_flat_smooth();
+      break;
+    //
+    case OBJECT_CYLINDER:
+      Cylinder.draw_lighted_flat_smooth();
+      break;
+    case OBJECT_CONE:
+      Cone.draw_lighted_flat_smooth();
+      break;
+    case OBJECT_SPHERE:
+      Sphere.draw_lighted_flat_smooth();
+      break;
+    case OBJECT_PLY:
+      Ply.draw_lighted_flat_smooth();
+      break;
+    case OBJECT_PERRO:
+      draw_model(_draw_modes::SMOOTH);
+      break;
+    }
+  }
 
   if (Draw_chess)
   {
@@ -469,6 +501,8 @@ void _gl_widget::initializeGL()
   Draw_line = false;
   Draw_fill = false;
   Draw_chess = false;
+  Draw_light = false;
+
   animacion = false;
 
   fac_lv3_1d = 0;
@@ -652,14 +686,6 @@ void _gl_widget::draw_model(_draw_modes dm)
     break;
 
   case _gl_widget_ne::_motion::ANIMACION:
-    fac_lv3_1d = 0;
-    fac_lv3_2d = 0;
-    fac_lv4d_1d = 0;
-    fac_lv4d_2d = 0;
-    fac_lv4t_1d = 0;
-    fac_lv4t_2d = 0;
-    fac_lv5_1d = 0;
-    fac_lv5_2d = 0;
 
     timer->start(20);
     //Una vez activada la animación, volvemos al estado estático, si no se estaria llamando todo el rato
