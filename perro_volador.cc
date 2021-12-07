@@ -13,9 +13,12 @@ void _perro_volador::Draw_xxx(float l3_1d, float l3_2d, float l4d_1d, float l4d_
     glPopMatrix();
 
     glPushMatrix();
-    glTranslated(0, 0.05 * l5_1d + 7, 0);
-    glTranslated(0, 1.5 + l4d_2d / 45 + l4t_2d / 45, 0);
+    glTranslated(0, 0.05 * l5_1d + 8.25, 0);
+    glTranslated(0,l4d_2d / 45 + l4t_2d / 45, 0);
     glRotated(l4d_2d - l4t_2d, 0, 0, 1);
     gorrocoptero.Draw_xxx(l5_1d, l5_2d, dm);
     glPopMatrix();
+
+
+
 }

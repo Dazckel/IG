@@ -32,8 +32,14 @@ _gl_widget::_gl_widget(_window *Window1) : Window(Window1)
  *
  *****************************************************************************/
 
+/*
+Reimplenetar la funcion
+mouspress
+mousmove
+*/
 void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 {
+
   switch (Keyevent->key())
   {
   case Qt::Key_1:
@@ -66,15 +72,28 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
   case Qt::Key_L:
     Draw_line = !Draw_line;
     break;
-  case Qt::Key_F:
-    Draw_fill = !Draw_fill;
-    break;
-  case Qt::Key_C:
-    Draw_chess = !Draw_chess;
+  case Qt::Key_J:
+    first_light = !first_light;
     break;
   case Qt::Key_K:
-    Draw_light = !Draw_light;
+    second_light = !second_light;
     break;
+  case Qt::Key_F1:
+    Draw_fill = !Draw_fill;
+    break;
+  case Qt::Key_F2:
+    Draw_chess = !Draw_chess;
+    break;
+  case Qt::Key_F3:
+    Draw_flat = !Draw_flat;
+    break;
+  case Qt::Key_F4:
+    Draw_gouraud = !Draw_gouraud;
+    break;
+  case Qt::Key_F5:
+    Draw_texture = !Draw_texture;
+    break;
+
 
   //
   case Qt::Key_Q:
@@ -371,35 +390,76 @@ void _gl_widget::draw_objects()
       break;
     }
   }
-  if (Draw_light)
+
+  if (first_light)
+    glEnable(GL_LIGHT0);
+  if (second_light)
+    glEnable(GL_LIGHT1);
+
+  if (Draw_flat)
   {
-    glColor3fv((GLfloat *)&BLUE);
+    glShadeModel(GL_FLAT);
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_lighted_flat_smooth();
+      Tetrahedron.draw_lighted_flat();
       break;
     case OBJECT_CUBE:
-      Cube.draw_lighted_flat_smooth();
+      Cube.draw_lighted_flat();
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_lighted_flat_smooth();
+      Cylinder.draw_lighted_flat();
       break;
     case OBJECT_CONE:
-      Cone.draw_lighted_flat_smooth();
+      Cone.draw_lighted_flat();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_lighted_flat_smooth();
+      Sphere.draw_lighted_flat();
       break;
     case OBJECT_PLY:
-      Ply.draw_lighted_flat_smooth();
+      Ply.draw_lighted_flat();
+      break;
+    case OBJECT_PERRO:
+      draw_model(_draw_modes::FLAT);
+      break;
+    }
+  }
+
+  if (Draw_gouraud)
+  {
+    glShadeModel(GL_SMOOTH);
+
+    switch (Object)
+    {
+    case OBJECT_TETRAHEDRON:
+      Tetrahedron.draw_lighted_smooth(_object::OBJECT_TETRAHEDRON);
+      break;
+    case OBJECT_CUBE:
+      Cube.draw_lighted_smooth(_object::OBJECT_CUBE);
+      break;
+    //
+    case OBJECT_CYLINDER:
+      Cylinder.draw_lighted_smooth(_object::OBJECT_CYLINDER);
+      break;
+    case OBJECT_CONE:
+      Cone.draw_lighted_smooth(_object::OBJECT_CONE);
+      break;
+    case OBJECT_SPHERE:
+      Sphere.draw_lighted_smooth(_object::OBJECT_SPHERE);
+      break;
+    case OBJECT_PLY:
+      Ply.draw_lighted_smooth(_object::OBJECT_PLY);
       break;
     case OBJECT_PERRO:
       draw_model(_draw_modes::SMOOTH);
       break;
     }
   }
+  if (first_light)
+    glDisable(GL_LIGHT0);
+  if (second_light)
+    glDisable(GL_LIGHT1);
 
   if (Draw_chess)
   {
@@ -430,6 +490,21 @@ void _gl_widget::draw_objects()
       break;
     }
   }
+
+  if(Draw_texture)
+  {
+    switch (Object)
+    {
+    case OBJECT_TETRAHEDRON:
+      Tetrahedron.draw_texture();
+      break;
+    case OBJECT_CUBE:
+      Cube.draw_texture();
+      break;
+    //
+
+    }
+  }
 }
 
 /*****************************************************************************/ /**
@@ -444,6 +519,8 @@ void _gl_widget::paintGL()
   clear_window();
   change_projection();
   change_observer();
+  if ((second_light || first_light) && (Draw_gouraud || Draw_flat))
+    lights_options();
   draw_objects();
 }
 
@@ -456,6 +533,10 @@ void _gl_widget::paintGL()
 
 void _gl_widget::resizeGL(int Width1, int Height1)
 {
+  //La razón - ratio: cuando empezamos es 1:1
+  //Al cambiar la ventana, cambia la razón
+  //Para no deformar debemos cambiar la ventana en la cámara.
+
   glViewport(0, 0, Width1, Height1);
 }
 
@@ -502,9 +583,17 @@ void _gl_widget::initializeGL()
   Draw_fill = false;
   Draw_chess = false;
   Draw_light = false;
+  first_light = false;
+  second_light = false;
+  Draw_flat = false;
+  Draw_gouraud = false;
+  Draw_texture = false;
 
   animacion = false;
 
+  flx = 1;
+  fly = 1;
+  flz = 1;
   fac_lv3_1d = 0;
   fac_lv3_2d = 0;
   fac_lv4d_1d = 0;
@@ -536,7 +625,6 @@ void _gl_widget::draw_model(_draw_modes dm)
   case _gl_widget_ne::_motion::LEVEL_3:
     switch (opcion)
     {
-
     case _gl_widget_ne::_opciones::OP1:
       if (fac_lv3_1d < 0)
         fac_lv3_1d += gr1;
@@ -701,4 +789,84 @@ void _gl_widget::draw_model(_draw_modes dm)
   }
   opcion = _gl_widget_ne::_opciones::IDLE;
   perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, dm);
+}
+
+
+void _gl_widget::lights_options()
+{
+
+  GLfloat mat_specular[] = {0.4, 0.4, 0.4, 1};
+  GLfloat mat_shininess[] = {100.0f};
+  GLfloat mat_difuse[] = {0.5, 0.5, 0.5, 1};
+  GLfloat mat_ambient[] = {0.1, 0.1, 0.1, 1};
+
+  glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&mat_specular);
+  glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&mat_difuse);
+  glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&mat_ambient);
+  // PARÁMETROS LUZ
+  //0
+  if (first_light)
+  {
+
+    GLfloat light_ambient[] = {0.1, 0.1, 0.1, 1};
+    GLfloat light_specular[] = {0.4, 0.4, 0.4, 1};
+    GLfloat light_position0[] = {1.0, 1.0, 1.0, 0.0};
+    GLfloat lightDifuse[] = {0.5, 0.5, 0.5, 1};
+    //CONFIGURACIÓN LUZ
+
+    //0
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position0);            //POSICIÓN
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&lightDifuse);     //COMPONENTE DIFUSA
+    glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&light_specular); //COMPONENTE ESPECULAR
+    glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&light_ambient);   //COMONENTE AMBIENTAL
+  }
+
+  if (second_light)
+  {
+
+    GLfloat light_ambient1[] = {0.1, 0.0, 0.1, 1};
+    GLfloat light_specular1[] = {0.4, 0.0, 0.4, 1};
+    GLfloat light_position1[] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat lightDifuse1[] = {0.5, 0.0, 0.5, 1};
+    //CONFIGURACIÓN LUZ
+    //0
+    switch (opcion)
+    {
+    case _gl_widget_ne::_opciones::OP1:
+      flx += 1;
+      break;
+
+    case _gl_widget_ne::_opciones::OP2:
+      flx -= 1;
+      break;
+
+    case _gl_widget_ne::_opciones::OP3:
+      fly += 1;
+      break;
+    case _gl_widget_ne::_opciones::OP4:
+      fly -= 1;
+      break;
+
+    case _gl_widget_ne::_opciones::OP5:
+      flz += 1;
+      break;
+
+    case _gl_widget_ne::_opciones::OP6:
+      flz -= 1;
+      break;
+    }
+
+
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, (GLfloat *)&lightDifuse1);     //COMPONENTE DIFUSA
+    glLightfv(GL_LIGHT1, GL_SPECULAR, (GLfloat *)&light_specular1); //COMPONENTE ESPECULAR
+    glLightfv(GL_LIGHT1, GL_AMBIENT, (GLfloat *)&light_ambient1);   //COMONENTE AMBIENTAL
+
+    glPushMatrix();
+    glRotatef(flx, 1, 0, 0);
+    glRotatef(fly, 0, 1, 0);
+    glRotatef(flz, 0, 0, 1);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+    glPopMatrix();
+  }
 }

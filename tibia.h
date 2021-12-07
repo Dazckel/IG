@@ -3,6 +3,9 @@
 
 #include "aux.h"
 #include "sphere.h"
+#ifndef OBJECT_T
+#include "object_types.h"
+#endif
 
 
 class _tibia

@@ -56,6 +56,9 @@ void _revolution::GenerarTriangulos(vector<_vertex3f> v, int nr, eje e)
 
     //TRIANGULOS CENTRALES//
 
+
+
+///FORMA GUAY DE GENERAR LOS TRIANGULOS
     //Creamos los triángulos centrales que no se repiten, y
     // la unión final-principio va  aparte en una zona contigua del vector
     for (int j = 0; j < nv_sinrep - 1; j++)

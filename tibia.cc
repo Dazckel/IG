@@ -22,7 +22,6 @@ void _tibia::Draw_xxx(float l3_1d,float l3_2d,_draw_modes dm){
 
     //Rodilla
     glPushMatrix();
-    glScaled(0.45,0.45,0.45);
     switch (dm)
     {
     case _draw_modes::CHESS:
@@ -39,6 +38,12 @@ void _tibia::Draw_xxx(float l3_1d,float l3_2d,_draw_modes dm){
 
     case _draw_modes::LINES:
         esfera.draw_line();
+        break;
+    case _draw_modes::SMOOTH:
+        esfera.draw_lighted_smooth(_object::OBJECT_SPHERE);
+        break;
+    case _draw_modes::FLAT:
+        esfera.draw_lighted_flat();
         break;
     }
     glPopMatrix();

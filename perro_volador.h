@@ -3,6 +3,7 @@
 
 #include "gorrocoptero.h"
 #include "perro.h"
+
 class _perro_volador{
     public:
         _perro_volador();
@@ -10,6 +11,8 @@ class _perro_volador{
 
         _perro perro;
         _gorrocoptero gorrocoptero;
+        _sphere cubo;
+
 };
 
 

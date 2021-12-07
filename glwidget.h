@@ -6,7 +6,6 @@
  * GPL 3
  */
 
-
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
@@ -28,34 +27,70 @@
 #include "sphere.h"
 #include "object_ply.h"
 #include "perro_volador.h"
+#include "object_types.h"
 
+namespace _gl_widget_ne
+{
 
-namespace _gl_widget_ne {
+  const float X_MIN = -.1;
+  const float X_MAX = .1;
+  const float Y_MIN = -.1;
+  const float Y_MAX = .1;
+  const float FRONT_PLANE_PERSPECTIVE = (X_MAX - X_MIN) / 2;
+  const float BACK_PLANE_PERSPECTIVE = 1000;
+  const float DEFAULT_DISTANCE = 2;
+  const float ANGLE_STEP = 1;
 
-  const float X_MIN=-.1;
-  const float X_MAX=.1;
-  const float Y_MIN=-.1;
-  const float Y_MAX=.1;
-  const float FRONT_PLANE_PERSPECTIVE=(X_MAX-X_MIN)/2;
-  const float BACK_PLANE_PERSPECTIVE=1000;
-  const float DEFAULT_DISTANCE=2;
-  const float ANGLE_STEP=1;
+  typedef enum
+  {
+    MODE_DRAW_POINT,
+    MODE_DRAW_LINE,
+    MODE_DRAW_FILL,
+    MODE_DRAW_CHESS
+  } _mode_draw;
 
-  typedef enum {MODE_DRAW_POINT,MODE_DRAW_LINE,MODE_DRAW_FILL,MODE_DRAW_CHESS,MODE_DRAW_LIGHT} _mode_draw;
-  typedef enum {OBJECT_TETRAHEDRON,OBJECT_CUBE,OBJECT_CONE,OBJECT_CYLINDER,OBJECT_SPHERE,OBJECT_PLY,OBJECT_PERRO} _object;
 
   //
-  typedef enum {LEVEL_3,LEVEL_4,LEVEL_5,ESTATICO,ANIMACION,PARAR_ANIMACION,GRADOS} _motion;
+  typedef enum
+  {
+    LEVEL_3,
+    LEVEL_4,
+    LEVEL_5,
+    ESTATICO,
+    ANIMACION,
+    PARAR_ANIMACION,
+    GRADOS
+  } _motion;
 
-  typedef enum {OP1,OP2,OP3,OP4,IDLE,OP5,OP6,OP7,OP8,OP9,OP10,OP11,OP12} _opciones;
+  typedef enum
+  {
+    OP1,
+    OP2,
+    OP3,
+    OP4,
+    IDLE,
+    OP5,
+    OP6,
+    OP7,
+    OP8,
+    OP9,
+    OP10,
+    OP11,
+    OP12
+  } _opciones;
 
-  typedef enum {F1,F2,F3,F4} _fases;
+  typedef enum
+  {
+    F1,
+    F2,
+    F3,
+    F4
+  } _fases;
 }
 
 class _window;
 
-
-/*****************************************************************************//**
+/*****************************************************************************/ /**
  *
  *
  *
@@ -63,7 +98,7 @@ class _window;
 
 class _gl_widget : public QOpenGLWidget
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   _gl_widget(_window *Window1);
 
@@ -74,7 +109,7 @@ public:
   void draw_axis();
   void draw_objects();
   void draw_model(_draw_modes dm);
-
+  void lights_options();
 
   _gl_widget_ne::_motion motion;
   _gl_widget_ne::_opciones opcion;
@@ -100,22 +135,24 @@ private:
   _ply Ply;
   _perro_volador perro;
 
-  _gl_widget_ne::_object Object;
+  _object Object;
+
+  //MODOS
   bool Draw_point;
   bool Draw_line;
   bool Draw_fill;
   bool Draw_chess;
   bool Draw_light;
+  bool first_light;
+  bool second_light;
+  bool Draw_flat;
+  bool Draw_gouraud;
+  bool Draw_texture;
 
   float delanteras;
   float traseras;
   _gl_widget_ne::_fases F;
   QTimer *timer;
-
-
-
-
-
 
   float Observer_angle_x;
   float Observer_angle_y;
@@ -130,22 +167,21 @@ private:
   float fac_lv5_1d;
   float fac_lv5_2d;
 
+  float flx;
+  float fly;
+  float flz;
 
-//lv3
+  //lv3
   int gr1;
   int gr2;
 
-//lv4
+  //lv4
   int gr3;
   int gr4;
 
-//lv5
+  //lv5
   int gr5;
   int gr6;
-
-
-
-
 };
 
 #endif

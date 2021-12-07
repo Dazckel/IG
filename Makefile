@@ -53,53 +53,53 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = aux.cpp \
+		aux2.cc \
 		aux3.cc \
 		basic_object3d.cc \
 		cone.cc \
 		cylinder.cc \
+		femur.cc \
 		file_ply_stl.cc \
+		gorrocoptero.cc \
+		helice.cc \
 		object3d.cc \
 		axis.cc \
 		object_ply.cc \
 		object_rev.cc \
-		perro.cc \
-		tibia.cc \
 		pata.cc \
-		aux2.cc \
-		femur.cc \
+		perro.cc \
+		perro_volador.cc \
 		sphere.cc \
 		tetrahedron.cc \
-		perro_volador.cc \
-		helice.cc \
-		gorrocoptero.cc \
 		cube.cc \
 		main.cc \
 		glwidget.cc \
+		tibia.cc \
 		window.cc moc_glwidget.cpp \
 		moc_window.cpp
 OBJECTS       = aux.o \
+		aux2.o \
 		aux3.o \
 		basic_object3d.o \
 		cone.o \
 		cylinder.o \
+		femur.o \
 		file_ply_stl.o \
+		gorrocoptero.o \
+		helice.o \
 		object3d.o \
 		axis.o \
 		object_ply.o \
 		object_rev.o \
+		pata.o \
 		perro.o \
 		perro_volador.o \
-		helice.o \
-		gorrocoptero.o \
-		tibia.o \
-		pata.o \
-		aux2.o \
-		femur.o \
 		sphere.o \
 		tetrahedron.o \
 		cube.o \
 		main.o \
 		glwidget.o \
+		tibia.o \
 		window.o \
 		moc_glwidget.o \
 		moc_window.o
@@ -301,51 +301,52 @@ DIST          = window.o \
 		../../../Qt/5.12.5/gcc_64/mkspecs/features/yacc.prf \
 		../../../Qt/5.12.5/gcc_64/mkspecs/features/lex.prf \
 		esqueleto_qt.pro aux.h \
+		aux2.h \
 		aux3.h \
 		colors.h \
 		basic_object3d.h \
 		cone.h \
 		cylinder.h \
+		draw_types.h \
+		femur.h \
 		file_ply_stl.h \
+		gorrocoptero.h \
+		helice.h \
 		object3d.h \
 		axis.h \
 		object_ply.h \
 		object_rev.h \
-		perro.h \
-		sphere.h \
-		tibia.h \
-		perro_volador.h \
-		helice.h \
-		gorrocoptero.h \
 		pata.h \
-		aux2.h \
-		femur.h \
+		perro.h \
+		perro_volador.h \
+		sphere.h \
 		tetrahedron.h \
 		cube.h \
 		glwidget.h \
+		tibia.h \
 		window.h aux.cpp \
+		aux2.cc \
 		aux3.cc \
 		basic_object3d.cc \
 		cone.cc \
 		cylinder.cc \
+		femur.cc \
 		file_ply_stl.cc \
+		gorrocoptero.cc \
+		helice.cc \
 		object3d.cc \
 		axis.cc \
 		object_ply.cc \
 		object_rev.cc \
-		perro.cc \
-		tibia.cc \
 		pata.cc \
-		aux2.cc \
-		femur.cc \
+		perro.cc \
 		perro_volador.cc \
-		helice.cc \
-		gorrocoptero.cc \
 		sphere.cc \
 		tetrahedron.cc \
 		cube.cc \
 		main.cc \
 		glwidget.cc \
+		tibia.cc \
 		window.cc
 QMAKE_TARGET  = esqueleto_qt
 DESTDIR       = 
@@ -769,8 +770,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../Qt/5.12.5/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents perro_volador.h gorrocoptero.h helice.h aux.h aux2.h femur.h aux3.h colors.h basic_object3d.h cone.h cylinder.h file_ply_stl.h tibia.h object3d.h  pata.h  axis.h object_ply.h object_rev.h  perro.h sphere.h tetrahedron.h cube.h glwidget.h window.h $(DISTDIR)/
-	$(COPY_FILE) --parents perro_volador.cc femur.cc aux2.cc gorrocoptero.cc helice.cc aux.cpp aux3.cc basic_object3d.cc cone.cc cylinder.cc file_ply_stl.cc tibia.cc pata.cc  object3d.cc axis.cc object_ply.cc object_rev.cc perro.cc sphere.cc tetrahedron.cc cube.cc main.cc glwidget.cc window.cc $(DISTDIR)/
+	$(COPY_FILE) --parents aux.h aux2.h aux3.h colors.h basic_object3d.h cone.h cylinder.h draw_types.h femur.h file_ply_stl.h gorrocoptero.h helice.h object3d.h axis.h object_ply.h object_rev.h pata.h perro.h perro_volador.h sphere.h tetrahedron.h cube.h glwidget.h tibia.h window.h $(DISTDIR)/
+	$(COPY_FILE) --parents aux.cpp aux2.cc aux3.cc basic_object3d.cc cone.cc cylinder.cc femur.cc file_ply_stl.cc gorrocoptero.cc helice.cc object3d.cc axis.cc object_ply.cc object_rev.cc pata.cc perro.cc perro_volador.cc sphere.cc tetrahedron.cc cube.cc main.cc glwidget.cc tibia.cc window.cc $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -924,22 +925,27 @@ moc_glwidget.cpp: glwidget.h \
 		basic_object3d.h \
 		tetrahedron.h \
 		object3d.h \
+		draw_types.h \
+		object_types.h \
 		cube.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/QTimer \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/qtimer.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/qbasictimer.h \
 		object_rev.h \
 		cone.h \
 		cylinder.h \
 		sphere.h \
 		object_ply.h \
 		file_ply_stl.h \
-		perro.h \
-		tibia.h \
-		pata.h \
-		aux2.h \
-		femur.h \
 		perro_volador.h \
-		helice.h \
 		gorrocoptero.h \
+		helice.h \
+		perro.h \
+		pata.h \
+		tibia.h \
 		aux.h \
+		femur.h \
+		aux2.h \
 		aux3.h \
 		moc_predefs.h \
 		../../../Qt/5.12.5/gcc_64/bin/moc
@@ -1093,28 +1099,36 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean
 ####### Compile
 
 aux.o: aux.cpp aux.h \
-		cube.h \
+		cylinder.h \
+		object_rev.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aux.o aux.cpp
 
 aux2.o: aux2.cc aux2.h \
-		cube.h \
+		cylinder.h \
+		object_rev.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aux2.o aux2.cc
 
-
 aux3.o: aux3.cc aux3.h \
-		cube.h \
+		cylinder.h \
+		object_rev.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aux3.o aux3.cc
 
 basic_object3d.o: basic_object3d.cc basic_object3d.h \
@@ -1127,7 +1141,9 @@ cone.o: cone.cc cone.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cone.o cone.cc
 
 cylinder.o: cylinder.cc cylinder.h \
@@ -1135,17 +1151,58 @@ cylinder.o: cylinder.cc cylinder.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cylinder.o cylinder.cc
+
+femur.o: femur.cc femur.h \
+		aux2.h \
+		cylinder.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h \
+		sphere.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o femur.o femur.cc
 
 file_ply_stl.o: file_ply_stl.cc file_ply_stl.h \
 		vertex.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o file_ply_stl.o file_ply_stl.cc
 
+gorrocoptero.o: gorrocoptero.cc gorrocoptero.h \
+		cylinder.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h \
+		helice.h \
+		sphere.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gorrocoptero.o gorrocoptero.cc
+
+helice.o: helice.cc helice.h \
+		sphere.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o helice.o helice.cc
+
 object3d.o: object3d.cc object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o object3d.o object3d.cc
 
 axis.o: axis.cc axis.h \
@@ -1159,6 +1216,8 @@ object_ply.o: object_ply.cc object_ply.h \
 		basic_object3d.h \
 		colors.h \
 		vertex.h \
+		draw_types.h \
+		object_types.h \
 		file_ply_stl.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o object_ply.o object_ply.cc
 
@@ -1166,61 +1225,92 @@ object_rev.o: object_rev.cc object_rev.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o object_rev.o object_rev.cc
 
+pata.o: pata.cc pata.h \
+		tibia.h \
+		aux.h \
+		cylinder.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h \
+		sphere.h \
+		femur.h \
+		aux2.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o pata.o pata.cc
+
 perro.o: perro.cc perro.h \
-		pata.h\
+		pata.h \
+		tibia.h \
+		aux.h \
+		cylinder.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h \
+		sphere.h \
+		femur.h \
+		aux2.h \
 		aux3.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o perro.o perro.cc
 
-tibia.o: tibia.cc tibia.h \
-		aux.h \
-		sphere.h 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tibia.o tibia.cc
-
-femur.o: femur.cc femur.h \
-		aux2.h \
-		sphere.h 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o femur.o femur.cc
-
-pata.o: pata.cc pata.h \
-		tibia.h 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o pata.o pata.cc
-
 perro_volador.o: perro_volador.cc perro_volador.h \
+		gorrocoptero.h \
+		cylinder.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h \
+		helice.h \
+		sphere.h \
 		perro.h \
-		gorrocoptero.h 
+		pata.h \
+		tibia.h \
+		aux.h \
+		femur.h \
+		aux2.h \
+		aux3.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o perro_volador.o perro_volador.cc
 
-gorrocoptero.o: gorrocoptero.cc gorrocoptero.h \
-		helice.h \
-		cylinder.h 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gorrocoptero.o gorrocoptero.cc
-
-helice.o: helice.cc helice.h \
-		sphere.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o helice.o helice.cc
 sphere.o: sphere.cc sphere.h \
 		object_rev.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sphere.o sphere.cc
 
 tetrahedron.o: tetrahedron.cc tetrahedron.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tetrahedron.o tetrahedron.cc
 
 cube.o: cube.cc cube.h \
 		object3d.h \
 		basic_object3d.h \
 		colors.h \
-		vertex.h
+		vertex.h \
+		draw_types.h \
+		object_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cube.o cube.cc
 
 main.o: main.cc ../../../Qt/5.12.5/gcc_64/include/QtWidgets/QApplication \
@@ -1341,6 +1431,8 @@ main.o: main.cc ../../../Qt/5.12.5/gcc_64/include/QtWidgets/QApplication \
 		basic_object3d.h \
 		colors.h \
 		vertex.h \
+		draw_types.h \
+		object_types.h \
 		cube.h \
 		object_rev.h \
 		../../../Qt/5.12.5/gcc_64/include/QtGui/QSurfaceFormat \
@@ -1483,22 +1575,27 @@ glwidget.o: glwidget.cc glwidget.h \
 		basic_object3d.h \
 		tetrahedron.h \
 		object3d.h \
+		draw_types.h \
+		object_types.h \
 		cube.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/QTimer \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/qtimer.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/qbasictimer.h \
 		object_rev.h \
 		cone.h \
 		cylinder.h \
 		sphere.h \
 		object_ply.h \
 		file_ply_stl.h \
+		perro_volador.h \
+		gorrocoptero.h \
+		helice.h \
 		perro.h \
 		pata.h \
-		aux2.h \
-		femur.h \
-		perro_volador.h \
-		helice.h \
-		gorrocoptero.h \
 		tibia.h \
 		aux.h \
+		femur.h \
+		aux2.h \
 		aux3.h \
 		window.h \
 		../../../Qt/5.12.5/gcc_64/include/QtWidgets/QMainWindow \
@@ -1526,6 +1623,19 @@ glwidget.o: glwidget.cc glwidget.h \
 		../../../Qt/5.12.5/gcc_64/include/QtCore/qeventloop.h \
 		../../../Qt/5.12.5/gcc_64/include/QtGui/qinputmethod.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget.o glwidget.cc
+
+tibia.o: tibia.cc tibia.h \
+		aux.h \
+		cylinder.h \
+		object_rev.h \
+		object3d.h \
+		basic_object3d.h \
+		colors.h \
+		vertex.h \
+		draw_types.h \
+		object_types.h \
+		sphere.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tibia.o tibia.cc
 
 window.o: window.cc ../../../Qt/5.12.5/gcc_64/include/QtWidgets/QApplication \
 		../../../Qt/5.12.5/gcc_64/include/QtWidgets/qapplication.h \
@@ -1682,23 +1792,31 @@ window.o: window.cc ../../../Qt/5.12.5/gcc_64/include/QtWidgets/QApplication \
 		basic_object3d.h \
 		tetrahedron.h \
 		object3d.h \
+		draw_types.h \
+		object_types.h \
 		cube.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/QTimer \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/qtimer.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/qbasictimer.h \
 		object_rev.h \
 		cone.h \
 		cylinder.h \
 		sphere.h \
 		object_ply.h \
 		file_ply_stl.h \
-		perro.h \
-		aux2.h \
-		femur.h \
-		tibia.h \
-		pata.h \
 		perro_volador.h \
-		helice.h \
 		gorrocoptero.h \
+		helice.h \
+		perro.h \
+		pata.h \
+		tibia.h \
 		aux.h \
-		aux3.h
+		femur.h \
+		aux2.h \
+		aux3.h \
+		../../../Qt/5.12.5/gcc_64/include/QtWidgets/QToolBar \
+		../../../Qt/5.12.5/gcc_64/include/QtWidgets/qtoolbar.h \
+		../../../Qt/5.12.5/gcc_64/include/QtCore/QString
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o window.o window.cc
 
 moc_glwidget.o: moc_glwidget.cpp 

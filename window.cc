@@ -61,34 +61,32 @@ _window::_window()
   //AANIMACIO Y MOVIMIENTOS DEL MODELO
   //ANIMACION
 
-  const QIcon openIcon = QIcon::fromTheme("Animacion", QIcon("./icons/ANIMACION.png"));
-  QAction *openAct = new QAction(openIcon, tr("Animacion"), this);
-  connect(openAct, SIGNAL(triggered()), this, SLOT(animacion()));
+  QAction *Animacion = new QAction(tr("Animación"));
+  connect(Animacion, SIGNAL(triggered()), SLOT(animacion()));
 
   //NIVEL3
-  QAction *Nivel3 = new QAction(openIcon, tr("Nivel3"), this);
-  connect(Nivel3, SIGNAL(triggered()), this, SLOT(Nivel3()));
+  QAction *Nivel3 = new QAction(tr("Nivel3"));
+  connect(Nivel3, SIGNAL(triggered()), SLOT(Nivel3()));
 
   //Nivel4
-  QAction *Nivel4 = new QAction(openIcon, tr("Nivel4"), this);
-  connect(Nivel4, SIGNAL(triggered()), this, SLOT(Nivel4()));
+  QAction *Nivel4 = new QAction(tr("Nivel4"));
+  connect(Nivel4, SIGNAL(triggered()), SLOT(Nivel4()));
 
   //Nivel5
-  QAction *Nivel5 = new QAction(openIcon, tr("Nivel5"), this);
-  connect(Nivel5, SIGNAL(triggered()), this, SLOT(Nivel5()));
+  QAction *Nivel5 = new QAction(tr("Nivel5"));
+  connect(Nivel5, SIGNAL(triggered()), SLOT(Nivel5()));
 
   //Ratios
-  QAction *Ratios = new QAction(openIcon, tr("Aumentar ratios"), this);
-  connect(Ratios, SIGNAL(triggered()), this, SLOT(IncrementarRatio()));
+  QAction *Ratios = new QAction(tr("Ratios"));
+  connect(Ratios, SIGNAL(triggered()), SLOT(IncrementarRatio()));
 
-  //MENU DE LAS ACCIONES DEL MODELO
+  //TOOLBAR para modificar parámetros del modelo.
   ///////////////////////////
 
   QToolBar *toolbar = new QToolBar;
-  addToolBar(Qt::RightToolBarArea,toolbar);
+  addToolBar(Qt::RightToolBarArea, toolbar);
   toolbar->setToolButtonStyle(Qt::ToolButtonTextOnly);
-
-  toolbar->addAction(openAct);
+  toolbar->addAction(Animacion);
   toolbar->addSeparator();
   toolbar->addAction(Nivel3);
   toolbar->addSeparator();
@@ -97,10 +95,9 @@ _window::_window()
   toolbar->addAction(Nivel5);
   toolbar->addSeparator();
   toolbar->addAction(Ratios);
-  toolbar->toggleViewAction();
 
+  toolbar->setAttribute(Qt::WA_AlwaysShowToolTips);
 
-  //
 
   // menus
   QMenu *File_menu = menuBar()->addMenu(tr("&File"));
@@ -119,6 +116,7 @@ void _window::animacion()
     GL_widget->motion = _gl_widget_ne::_motion::ANIMACION;
   else
     GL_widget->motion = _gl_widget_ne::_motion::PARAR_ANIMACION;
+
 }
 
 void _window::Nivel3()
