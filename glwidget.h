@@ -9,7 +9,8 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <GL/gl.h>
+#include <GL/glew.h>
+
 #include <QOpenGLWidget>
 #include <QKeyEvent>
 #include <iostream>
@@ -20,7 +21,11 @@
 #include "cube.h"
 #include <QTimer>
 
+
 //
+#include "draw_modes.h"
+
+#include <tablero.h>
 #include "object_rev.h"
 #include "cone.h"
 #include "cylinder.h"
@@ -48,7 +53,6 @@ namespace _gl_widget_ne
     MODE_DRAW_FILL,
     MODE_DRAW_CHESS
   } _mode_draw;
-
 
   //
   typedef enum
@@ -100,20 +104,51 @@ class _gl_widget : public QOpenGLWidget
 {
   Q_OBJECT
 public:
+
+
+//Funciones de la Interfaz
+
+  void tetrahedron();
+  void cube();
+  void cone();
+  void cylinder();
+  void sphere();
+  void ply();
+  void model();
+  void map();
+  void various();
+  void plyS();
+
+  //Draw modes
+
+void Modes(_draw_modes dm);
+void ObjectType(_object ot);
+
+
+
+
+
   _gl_widget(_window *Window1);
 
   void clear_window();
   void change_projection();
   void change_observer();
+  void mouseMoveEvent(QMouseEvent *event);
+  void mousePressEvent(QMouseEvent *event);
+  void mouseReleaseEvent(QMouseEvent *event);
+  void pick();
 
   void draw_axis();
   void draw_objects();
-  void draw_model(_draw_modes dm);
+  void draw_model(_draw_modes_model dm);
   void lights_options();
 
   _gl_widget_ne::_motion motion;
   _gl_widget_ne::_opciones opcion;
   bool animacion;
+
+  bool first_light;
+  bool second_light;
 
 protected:
   void resizeGL(int Width1, int Height1) Q_DECL_OVERRIDE;
@@ -121,8 +156,11 @@ protected:
   void initializeGL() Q_DECL_OVERRIDE;
   void keyPressEvent(QKeyEvent *Keyevent) Q_DECL_OVERRIDE;
 
+
+
 public slots:
   void idle();
+
 
 private:
   _window *Window;
@@ -132,30 +170,48 @@ private:
   _cone Cone;
   _cylinder Cylinder;
   _sphere Sphere;
+  _tablero Tablero;
   _ply Ply;
   _perro_volador perro;
 
+
+  //Draw_modes
+  const int N_drawmodes = 9;
+  vector<bool> DrawModes;
+
+  //Objeto a dibujar
   _object Object;
 
-  //MODOS
-  bool Draw_point;
-  bool Draw_line;
-  bool Draw_fill;
-  bool Draw_chess;
-  bool Draw_light;
-  bool first_light;
-  bool second_light;
-  bool Draw_flat;
-  bool Draw_gouraud;
-  bool Draw_texture;
+  //Vector de objetos
+  int objetos_size = 5;
+  vector<_object3D> objetos;
+  int the_one_object;
+  vector<pair<int, int>> rangos_id;
 
-  float delanteras;
-  float traseras;
+  // Vector de plys
+  int size_ply = 7;
+  int separacion = 13;
+  vector<_object3D> vector_plys;
+  vector<pair<int, int>> rangos_id_ply;
+  int the_one_ply;
+
+
+
+  bool projection;
+
+  float OldX;
+  float OldY;
+
   _gl_widget_ne::_fases F;
   QTimer *timer;
 
   float Observer_angle_x;
   float Observer_angle_y;
+
+  float Selection_position_x;
+  float Selection_position_y;
+  bool Change_position;
+
   float Observer_distance;
 
   float fac_lv3_1d;
@@ -167,9 +223,14 @@ private:
   float fac_lv5_1d;
   float fac_lv5_2d;
 
-  float flx;
-  float fly;
-  float flz;
+  float X_MIN_O = -.9;
+  float X_MAX_O = .9;
+  float Y_MIN_O = -.9;
+  float Y_MAX_O = .9;
+
+  int flx;
+  int fly;
+  int flz;
 
   //lv3
   int gr1;
@@ -182,6 +243,8 @@ private:
   //lv5
   int gr5;
   int gr6;
+
+  int material;
 };
 
 #endif

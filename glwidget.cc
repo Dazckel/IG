@@ -37,65 +37,355 @@ Reimplenetar la funcion
 mouspress
 mousmove
 */
+
+// Skeleton for pick fuction using glDeleteFramebuffers
+//
+// Domingo Martín Perandrés
+// GPL
+//
+// Window_width and Window_height are the widht and height of the device window
+// Selection_position_x and Selection_position_y are the coordinates of the mouse
+
+void _gl_widget::pick()
+{
+  makeCurrent();
+
+  // Frame Buffer Object to do the off-screen rendering
+  GLuint FBO;
+  glGenFramebuffers(1, &FBO);
+  glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+  // Texture for drawing
+  GLuint Color_texture;
+  glGenTextures(1, &Color_texture);
+  glBindTexture(GL_TEXTURE_2D, Color_texture);
+  // RGBA8
+  glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width(), height());
+  // this implies that there is not mip mapping
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // Texure for computing the depth
+  GLuint Depth_texture;
+  glGenTextures(1, &Depth_texture);
+  glBindTexture(GL_TEXTURE_2D, Depth_texture);
+  // Float
+  glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT24, width(), height());
+
+  // Attatchment of the textures to the FBO
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, Color_texture, 0);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, Depth_texture, 0);
+
+  // OpenGL will draw to these buffers (only one in this case)
+  static const GLenum Draw_buffers[] = {GL_COLOR_ATTACHMENT0};
+  glDrawBuffers(1, Draw_buffers);
+
+  /*************************/
+  int id;
+  int id_fin;
+  int p;
+  the_one_ply = -1;
+  the_one_object = -1;
+  switch (Object)
+  {
+  case OBJECT_TETRAHEDRON:
+    Tetrahedron.draw_selection();
+    Tetrahedron.selected = false;
+    break;
+  case OBJECT_CUBE:
+    Cube.draw_selection();
+    Cube.selected = false;
+    break;
+  //
+  case OBJECT_CYLINDER:
+    Cylinder.draw_selection();
+    Cylinder.selected = false;
+    break;
+  case OBJECT_CONE:
+    Cone.draw_selection();
+    Tetrahedron.selected = false;
+    break;
+  case OBJECT_SPHERE:
+    Sphere.draw_selection();
+    Sphere.selected = false;
+    break;
+  case OBJECT_PLY:
+    Ply.draw_selection();
+    Ply.selected = false;
+    break;
+  case OBJECT_TABLERO:
+    Tablero.draw_selection();
+    Tablero.selected = false;
+    break;
+  case MULTIPLE_OBJECTS:
+    id = 1;
+    id_fin = 1;
+    for (int i = 0; i < objetos_size; i++)
+    {
+
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+      id_fin = objetos[i].draw_selection(id);
+      objetos[i].selected = false;
+      pair<int, int> aux(id, id_fin);
+      rangos_id[i] = aux;
+      id = id_fin;
+      glPopMatrix();
+    }
+
+    break;
+  case PLYS:
+    id = 1;
+    id_fin = 1;
+    p = 0;
+    for (int i = 0; i < size_ply; i++)
+      for (int j = 0; j < size_ply; j++, p++)
+      {
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+        id_fin = vector_plys[p].draw_selection(id);
+        vector_plys[p].selected = false;
+        pair<int, int> aux(id, id_fin);
+        rangos_id_ply[p] = aux;
+        id = id_fin;
+        glPopMatrix();
+      }
+
+    break;
+  case OBJECT_PERRO:
+    perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, _draw_modes_model::SELECTION);
+    break;
+  }
+  /*************************/
+
+  // get the pixel
+  int Color;
+  glReadBuffer(GL_FRONT);
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &Color);
+
+  /*************************/
+
+  uint B = uint((Color & 0x00FF0000) >> 16);
+  uint G = uint((Color & 0x0000FF00) >> 8);
+  uint R = uint((Color & 0x000000FF));
+
+  int Selected_triangle = (R << 16) + (G << 8) + B;
+  cout << Selected_triangle << endl;
+  if (Selected_triangle == 16777215)
+    Selected_triangle = -1;
+  switch (Object)
+  {
+  case OBJECT_TETRAHEDRON:
+    Tetrahedron.selected = true;
+    Tetrahedron.n_triangle_selected = Selected_triangle;
+    break;
+  case OBJECT_CUBE:
+    Cube.selected = true;
+    Cube.n_triangle_selected = Selected_triangle;
+    break;
+  //
+  case OBJECT_CYLINDER:
+    Cylinder.selected = true;
+    Cylinder.n_triangle_selected = Selected_triangle;
+    break;
+  case OBJECT_CONE:
+    Cone.selected = true;
+    Cone.n_triangle_selected = Selected_triangle;
+    break;
+  case OBJECT_SPHERE:
+    Sphere.selected = true;
+    Sphere.n_triangle_selected = Selected_triangle;
+    break;
+  case OBJECT_PLY:
+    Ply.selected = true;
+    Ply.n_triangle_selected = Selected_triangle;
+    break;
+  case OBJECT_TABLERO:
+    Tablero.selected = true;
+    Tablero.n_triangle_selected = Selected_triangle;
+    break;
+  case MULTIPLE_OBJECTS:
+
+    for (int i = 0; i < objetos_size; i++)
+    {
+      if ((rangos_id[i].first <= Selected_triangle) && (rangos_id[i].second > Selected_triangle))
+      {
+        Selected_triangle -= rangos_id[i].first;
+        objetos[i].n_triangle_selected = Selected_triangle;
+        objetos[i].selected = true;
+        the_one_object = i;
+      }
+    }
+    break;
+
+  case PLYS:
+    for (int i = 0; i < size_ply * size_ply; i++)
+    {
+      if ((rangos_id_ply[i].first <= Selected_triangle) && (rangos_id_ply[i].second > Selected_triangle))
+      {
+        Selected_triangle -= rangos_id_ply[i].first;
+        vector_plys[i].n_triangle_selected = Selected_triangle;
+        vector_plys[i].selected = true;
+        the_one_ply = i;
+      }
+    }
+    break;
+  case OBJECT_PERRO:
+    perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, _draw_modes_model::SELECTION);
+    break;
+  }
+
+  glUseProgram(0);
+  glBindVertexArray(0);
+  /*************************/
+
+  glDeleteTextures(1, &Color_texture);
+  glDeleteTextures(1, &Depth_texture);
+  glDeleteFramebuffers(1, &FBO);
+  // the normal framebuffer takes the control of drawing
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFramebufferObject());
+  switch (Object)
+  {
+  case OBJECT_TETRAHEDRON:
+    Tetrahedron.draw_fill();
+    break;
+  case OBJECT_CUBE:
+    Cube.draw_fill();
+    break;
+  //
+  case OBJECT_CYLINDER:
+    Cylinder.draw_fill();
+    break;
+  case OBJECT_CONE:
+    Cone.draw_fill();
+    break;
+  case OBJECT_SPHERE:
+    Sphere.draw_fill();
+    break;
+  case OBJECT_PLY:
+    Ply.draw_fill();
+    break;
+  case OBJECT_PERRO:
+    draw_model(_draw_modes_model::FILL);
+    break;
+  case OBJECT_TABLERO:
+    Tablero.draw_fill();
+    break;
+  case MULTIPLE_OBJECTS:
+
+    for (int i = 0; i < objetos_size; i++)
+    {
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+      objetos[i].draw_fill();
+      glPopMatrix();
+    }
+    break;
+  case PLYS:
+    p = 0;
+    for (int i = 0; i < size_ply; i++)
+      for (int j = 0; j < size_ply; j++, p++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated((size_ply + separacion) * i - size_ply * separacion, -separacion * size_ply / 2 + j * separacion, 0);
+        vector_plys[p].draw_fill();
+        glPopMatrix();
+      }
+    break;
+  }
+}
+
+void _gl_widget::mousePressEvent(QMouseEvent *Event)
+{
+  if (Event->buttons() & Qt::LeftButton)
+  {
+    Change_position = true;
+    OldX = Event->x();
+    OldY = Event->y();
+  }
+  else
+  {
+    if (Event->buttons() & Qt::RightButton)
+    {
+      Selection_position_x = Event->x();
+      Selection_position_y = height() - Event->y();
+    }
+  }
+  update();
+}
+
+void _gl_widget ::mouseReleaseEvent(QMouseEvent *Event)
+{
+
+  if (Event->button() & Qt::RightButton)
+  {
+    if (DrawModes[1])
+      pick();
+  }
+  if (Event->button() & Qt::LeftButton)
+    Change_position = false;
+
+  update();
+}
+
+void _gl_widget::mouseMoveEvent(QMouseEvent *event)
+{
+
+  if (Change_position)
+  {
+    float X = event->x();
+    float Y = event->y();
+
+    float XDisplacement = X - OldX;
+    float YDisplacement = Y - OldY;
+
+    if (XDisplacement < 0)
+    {
+      XDisplacement = -.2 * abs(XDisplacement);
+    }
+    else
+    {
+      XDisplacement = .2 * abs(XDisplacement);
+    }
+
+    if (YDisplacement < 0)
+    {
+      YDisplacement = -.2 * abs(YDisplacement);
+    }
+    else
+    {
+      YDisplacement = .2 * abs(YDisplacement);
+    }
+
+    Observer_angle_x += YDisplacement;
+    Observer_angle_y += XDisplacement;
+    OldX = X;
+    OldY = Y;
+    update();
+  }
+}
+
 void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
 {
 
   switch (Keyevent->key())
   {
-  case Qt::Key_1:
-    Object = OBJECT_TETRAHEDRON;
-    break;
-  case Qt::Key_2:
-    Object = OBJECT_CUBE;
-    break;
-
-  //
-  case Qt::Key_3:
-    Object = OBJECT_CYLINDER;
-    break;
-  case Qt::Key_4:
-    Object = OBJECT_CONE;
-    break;
-  case Qt::Key_5:
-    Object = OBJECT_SPHERE;
-    break;
-  case Qt::Key_6:
-    Object = OBJECT_PLY;
-    break;
-  case Qt::Key_7:
-    Object = OBJECT_PERRO;
-    break;
-
-  case Qt::Key_P:
-    Draw_point = !Draw_point;
-    break;
-  case Qt::Key_L:
-    Draw_line = !Draw_line;
+  case Qt::Key_M:
+    material = (material + 1) % 3;
     break;
   case Qt::Key_J:
     first_light = !first_light;
     break;
   case Qt::Key_K:
     second_light = !second_light;
-    break;
-  case Qt::Key_F1:
-    Draw_fill = !Draw_fill;
-    break;
-  case Qt::Key_F2:
-    Draw_chess = !Draw_chess;
-    break;
-  case Qt::Key_F3:
-    Draw_flat = !Draw_flat;
-    break;
-  case Qt::Key_F4:
-    Draw_gouraud = !Draw_gouraud;
-    break;
-  case Qt::Key_F5:
-    Draw_texture = !Draw_texture;
-    break;
 
-
-  //
+    break;
   case Qt::Key_Q:
     opcion = _gl_widget_ne::_opciones::OP1;
     break;
@@ -135,7 +425,12 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
     opcion = _gl_widget_ne::_opciones::OP12;
     break;
     //
-
+  case Qt::Key_C:
+    projection = false;
+    break;
+  case Qt::Key_V:
+    projection = true;
+    break;
   case Qt::Key_Left:
     Observer_angle_y -= ANGLE_STEP;
     break;
@@ -153,6 +448,19 @@ void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
     break;
   case Qt::Key_PageDown:
     Observer_distance /= 1.2;
+    break;
+
+  case Qt::Key_Plus:
+    X_MIN_O *= .7;
+    Y_MIN_O *= .7;
+    X_MAX_O *= .7;
+    Y_MAX_O *= .7;
+    break;
+  case Qt::Key_Minus:
+    X_MIN_O /= .7;
+    Y_MIN_O /= .7;
+    X_MAX_O /= .7;
+    Y_MAX_O /= .7;
     break;
   }
 
@@ -178,16 +486,6 @@ void _gl_widget::clear_window()
  *
  *****************************************************************************/
 
-void _gl_widget::change_projection()
-{
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  // formato(x_minimo,x_maximo, y_minimo, y_maximo,Front_plane, plano_traser)
-  // Front_plane>0  Back_plane>PlanoDelantero)
-  glFrustum(X_MIN, X_MAX, Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
-}
-
 /*****************************************************************************/ /**
  * Funcion para definir la transformación de vista (posicionar la camara)
  *
@@ -198,6 +496,7 @@ void _gl_widget::change_projection()
 void _gl_widget::change_observer()
 {
   // posicion del observador
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glTranslatef(0, 0, -Observer_distance);
@@ -298,8 +597,7 @@ void _gl_widget::idle()
 void _gl_widget::draw_objects()
 {
   Axis.draw_line();
-
-  if (Draw_point)
+  if (DrawModes[0])
   {
     glPointSize(5);
     glColor3fv((GLfloat *)&BLACK);
@@ -324,16 +622,19 @@ void _gl_widget::draw_objects()
     case OBJECT_PLY:
       Ply.draw_point();
       break;
+    case OBJECT_TABLERO:
+      Tablero.draw_point();
+      break;
     case OBJECT_PERRO:
-      draw_model(_draw_modes::POINTS);
+      draw_model(_draw_modes_model::POINTS);
       break;
     }
   }
 
-  if (Draw_line)
+  if (DrawModes[8])
   {
     glLineWidth(3);
-    glColor3fv((GLfloat *)&MAGENTA);
+
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
@@ -356,14 +657,17 @@ void _gl_widget::draw_objects()
       Ply.draw_line();
       break;
     case OBJECT_PERRO:
-      draw_model(_draw_modes::LINES);
+      draw_model(_draw_modes_model::LINES);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_line();
       break;
     }
   }
 
-  if (Draw_fill)
+  if (DrawModes[1])
   {
-    glColor3fv((GLfloat *)&BLUE);
+    glColor3fv((GLfloat *)&RED);
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
@@ -386,7 +690,45 @@ void _gl_widget::draw_objects()
       Ply.draw_fill();
       break;
     case OBJECT_PERRO:
-      draw_model(_draw_modes::FILL);
+      draw_model(_draw_modes_model::FILL);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_fill();
+      break;
+    case MULTIPLE_OBJECTS:
+
+      for (int i = 0; i < objetos_size; i++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+        if (the_one_object == i)
+        {
+          glLineWidth(5);
+          objetos[the_one_object].draw_line();
+        }
+        objetos[i].draw_fill();
+        glPopMatrix();
+      }
+
+      break;
+    case PLYS:
+      int p = 0;
+      for (int i = 0; i < size_ply; i++)
+        for (int j = 0; j < size_ply; j++, p++)
+        {
+          glMatrixMode(GL_MODELVIEW);
+          glPushMatrix();
+          glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+          if (p == the_one_ply)
+          {
+            glLineWidth(5);
+            vector_plys[the_one_ply].draw_line();
+          }
+          vector_plys[p].draw_fill();
+          glPopMatrix();
+        }
+
       break;
     }
   }
@@ -396,7 +738,7 @@ void _gl_widget::draw_objects()
   if (second_light)
     glEnable(GL_LIGHT1);
 
-  if (Draw_flat)
+  if (DrawModes[3])
   {
     glShadeModel(GL_FLAT);
     switch (Object)
@@ -421,12 +763,61 @@ void _gl_widget::draw_objects()
       Ply.draw_lighted_flat();
       break;
     case OBJECT_PERRO:
-      draw_model(_draw_modes::FLAT);
+      draw_model(_draw_modes_model::FLAT);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_lighted_flat();
+      break;
+    }
+  }
+  if (DrawModes[6])
+  {
+    glShadeModel(GL_FLAT);
+    glActiveTexture(GL_TEXTURE0);
+    switch (Object)
+    {
+    case OBJECT_CYLINDER:
+      Cylinder.draw_texture_flat();
+      break;
+    case OBJECT_CONE:
+      Cone.draw_texture_flat();
+      break;
+    case OBJECT_SPHERE:
+      Sphere.draw_texture_flat();
+      break;
+    case OBJECT_PERRO:
+      draw_model(_draw_modes_model::TEXTURE);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_texture_flat();
       break;
     }
   }
 
-  if (Draw_gouraud)
+  if (DrawModes[7])
+  {
+    glActiveTexture(GL_TEXTURE0);
+    glShadeModel(GL_SMOOTH);
+    switch (Object)
+    {
+    case OBJECT_CYLINDER:
+      Cylinder.draw_texture_smooth(_object::OBJECT_CYLINDER);
+      break;
+    case OBJECT_CONE:
+      Cone.draw_texture_smooth(_object::OBJECT_CONE);
+      break;
+    case OBJECT_SPHERE:
+      Sphere.draw_texture_smooth(_object::OBJECT_SPHERE);
+      break;
+    case OBJECT_PERRO:
+      draw_model(_draw_modes_model::TEXTURE);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_texture_smooth(_object::OBJECT_TABLERO);
+      break;
+    }
+  }
+  if (DrawModes[4])
   {
     glShadeModel(GL_SMOOTH);
 
@@ -452,7 +843,10 @@ void _gl_widget::draw_objects()
       Ply.draw_lighted_smooth(_object::OBJECT_PLY);
       break;
     case OBJECT_PERRO:
-      draw_model(_draw_modes::SMOOTH);
+      draw_model(_draw_modes_model::SMOOTH);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_lighted_smooth(_object::OBJECT_TABLERO);
       break;
     }
   }
@@ -461,7 +855,30 @@ void _gl_widget::draw_objects()
   if (second_light)
     glDisable(GL_LIGHT1);
 
-  if (Draw_chess)
+  if (DrawModes[5])
+  {
+    glActiveTexture(GL_TEXTURE0);
+    switch (Object)
+    {
+    case OBJECT_CYLINDER:
+      Cylinder.draw_texture();
+      break;
+    case OBJECT_CONE:
+      Cone.draw_texture();
+      break;
+    case OBJECT_SPHERE:
+      Sphere.draw_texture();
+      break;
+    case OBJECT_PERRO:
+      draw_model(_draw_modes_model::TEXTURE);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_texture();
+      break;
+    }
+  }
+
+  if (DrawModes[2])
   {
     glColor3fv((GLfloat *)&RED);
     switch (Object)
@@ -486,25 +903,26 @@ void _gl_widget::draw_objects()
       Ply.draw_chess();
       break;
     case OBJECT_PERRO:
-      draw_model(_draw_modes::CHESS);
+      draw_model(_draw_modes_model::CHESS);
+      break;
+    case OBJECT_TABLERO:
+      Tablero.draw_chess();
       break;
     }
   }
+}
 
-  if(Draw_texture)
-  {
-    switch (Object)
-    {
-    case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_texture();
-      break;
-    case OBJECT_CUBE:
-      Cube.draw_texture();
-      break;
-    //
+void _gl_widget::change_projection()
+{
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
 
-    }
-  }
+  // formato(x_minimo,x_maximo, y_minimo, y_maximo,Front_plane, plano_traser)
+  // Front_plane>0  Back_plane>PlanoDelantero)
+  if (!projection)
+    glFrustum(X_MIN * this->width() / this->height(), X_MAX * this->width() / this->height(), Y_MIN, Y_MAX, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
+  else
+    glOrtho(X_MIN_O * this->width() / this->height(), X_MAX_O * this->width() / this->height(), Y_MIN_O, Y_MAX_O, FRONT_PLANE_PERSPECTIVE, BACK_PLANE_PERSPECTIVE);
 }
 
 /*****************************************************************************/ /**
@@ -516,10 +934,12 @@ void _gl_widget::draw_objects()
 
 void _gl_widget::paintGL()
 {
+
   clear_window();
+  resizeGL(this->width(), this->height());
   change_projection();
   change_observer();
-  if ((second_light || first_light) && (Draw_gouraud || Draw_flat))
+  if ((second_light || first_light) && (DrawModes[4] || DrawModes[3] || DrawModes[7] || DrawModes[6]))
     lights_options();
   draw_objects();
 }
@@ -549,6 +969,18 @@ void _gl_widget::resizeGL(int Width1, int Height1)
 
 void _gl_widget::initializeGL()
 {
+
+  glewExperimental = GL_TRUE;
+
+  int err = glewInit();
+  if (GLEW_OK != err)
+  {
+    // Problem: glewInit failed, something is seriously wrong.
+    QMessageBox MsgBox(this);
+    MsgBox.setText("Error: There is not OpenGL drivers\n\nPlease, look for the information of your GPU (AMD, INTEL or NVIDIA) and install the drivers");
+    MsgBox.exec();
+    Window->close();
+  }
   const GLubyte *strm;
 
   strm = glGetString(GL_VENDOR);
@@ -578,18 +1010,18 @@ void _gl_widget::initializeGL()
   Observer_angle_y = 0;
   Observer_distance = DEFAULT_DISTANCE;
 
-  Draw_point = false;
-  Draw_line = false;
-  Draw_fill = false;
-  Draw_chess = false;
-  Draw_light = false;
+  //Vector de modos
+  DrawModes.resize(N_drawmodes);
+  for (int i = 0; i < N_drawmodes; i++)
+    DrawModes[i] = false;
+
   first_light = false;
   second_light = false;
-  Draw_flat = false;
-  Draw_gouraud = false;
-  Draw_texture = false;
-
   animacion = false;
+  Change_position = false;
+  projection = false;
+
+  material = 0;
 
   flx = 1;
   fly = 1;
@@ -610,15 +1042,29 @@ void _gl_widget::initializeGL()
   gr5 = 1;
   gr6 = 1;
 
+  objetos = {Sphere, Cylinder, Cone, Tetrahedron, Cube};
+  the_one_object = -1;
+  //Inicialización del vector de Plys.
+  vector_plys.resize(size_ply * size_ply);
+  for (int i = 0; i < size_ply * size_ply; i++)
+  {
+    _ply aux;
+    vector_plys[i] = aux;
+  }
+  the_one_ply = -1;
+
   F = _fases::F1;
   motion = _motion::ESTATICO;
   opcion = _opciones::IDLE;
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(idle()));
+
+  rangos_id.resize((objetos.size()));
+  rangos_id_ply.resize(size_ply * size_ply);
 }
 
-void _gl_widget::draw_model(_draw_modes dm)
+void _gl_widget::draw_model(_draw_modes_model dm)
 {
   switch (motion)
   {
@@ -791,28 +1237,59 @@ void _gl_widget::draw_model(_draw_modes dm)
   perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, dm);
 }
 
-
 void _gl_widget::lights_options()
 {
+  GLfloat mat_specular[] = {0.633, 0.727811, 0.633, 1};
+  GLfloat mat_shininess[] = {60.0f};
+  GLfloat mat_difuse[] = {1, 1, 1, 1};
+  GLfloat mat_ambient[] = {0.0215, 0.1745, 0.0215, 1};
 
-  GLfloat mat_specular[] = {0.4, 0.4, 0.4, 1};
-  GLfloat mat_shininess[] = {100.0f};
-  GLfloat mat_difuse[] = {0.5, 0.5, 0.5, 1};
-  GLfloat mat_ambient[] = {0.1, 0.1, 0.1, 1};
+  GLfloat mat_specular1[] = {0.727811, 0.626959, 0.626959, 1};
+  GLfloat mat_shininess1[] = {15.0f};
+  GLfloat mat_difuse1[] = {0.61424, 0.04136, 0.04136, 1};
+  GLfloat mat_ambient1[] = {0.1745, 0.1745, 0.01175, 1};
 
-  glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&mat_specular);
-  glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&mat_difuse);
-  glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&mat_ambient);
+  GLfloat mat_specular2[] = {0.296648, 0.296648, 0.296648, 1};
+  GLfloat mat_shininess2[] = {100.0f};
+  GLfloat mat_difuse2[] = {1, 0.829, 0.829, 1};
+  GLfloat mat_ambient2[] = {0.25, 0.20725, 0.20725, 1};
+
+  switch (material)
+  {
+  case 0:
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&mat_difuse);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&mat_ambient);
+    break;
+
+  case 1:
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&mat_specular1);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess1);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&mat_difuse1);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&mat_ambient1);
+    break;
+
+  case 2:
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&mat_specular2);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess2);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&mat_difuse2);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&mat_ambient2);
+    break;
+  }
+
   // PARÁMETROS LUZ
   //0
   if (first_light)
   {
 
     GLfloat light_ambient[] = {0.1, 0.1, 0.1, 1};
-    GLfloat light_specular[] = {0.4, 0.4, 0.4, 1};
+    GLfloat light_specular[] = {1, 1, 1, 1};
     GLfloat light_position0[] = {1.0, 1.0, 1.0, 0.0};
-    GLfloat lightDifuse[] = {0.5, 0.5, 0.5, 1};
+    GLfloat lightDifuse[] = {0.6, 0.6, 0.6, 6};
     //CONFIGURACIÓN LUZ
 
     //0
@@ -826,7 +1303,7 @@ void _gl_widget::lights_options()
   {
 
     GLfloat light_ambient1[] = {0.1, 0.0, 0.1, 1};
-    GLfloat light_specular1[] = {0.4, 0.0, 0.4, 1};
+    GLfloat light_specular1[] = {1, 0.0, 1, 1};
     GLfloat light_position1[] = {1.0, 1.0, 1.0, 1.0};
     GLfloat lightDifuse1[] = {0.5, 0.0, 0.5, 1};
     //CONFIGURACIÓN LUZ
@@ -834,29 +1311,27 @@ void _gl_widget::lights_options()
     switch (opcion)
     {
     case _gl_widget_ne::_opciones::OP1:
-      flx += 1;
+      flx = (flx + 2);
       break;
-
     case _gl_widget_ne::_opciones::OP2:
-      flx -= 1;
+      flx = (flx - 2);
       break;
-
     case _gl_widget_ne::_opciones::OP3:
-      fly += 1;
+      fly = (fly + 2);
       break;
     case _gl_widget_ne::_opciones::OP4:
-      fly -= 1;
+      fly = (fly - 2);
       break;
 
     case _gl_widget_ne::_opciones::OP5:
-      flz += 1;
+      flz = (flz + 2);
       break;
 
     case _gl_widget_ne::_opciones::OP6:
-      flz -= 1;
+      flz = (flz - 2);
       break;
     }
-
+    opcion = _gl_widget_ne::_opciones::IDLE;
 
     glLightfv(GL_LIGHT1, GL_DIFFUSE, (GLfloat *)&lightDifuse1);     //COMPONENTE DIFUSA
     glLightfv(GL_LIGHT1, GL_SPECULAR, (GLfloat *)&light_specular1); //COMPONENTE ESPECULAR
@@ -869,4 +1344,87 @@ void _gl_widget::lights_options()
     glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
     glPopMatrix();
   }
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+void _gl_widget::Modes(_draw_modes dm)
+{
+  for (int i = 0; i < N_drawmodes; i++)
+    DrawModes[i] = false;
+  switch (dm)
+  {
+  case _draw_modes::POINT:
+    DrawModes[0] = !DrawModes[0];
+    break;
+  case _draw_modes::FILL:
+    DrawModes[1] = !DrawModes[1];
+    break;
+  case _draw_modes::CHESS:
+    DrawModes[2] = !DrawModes[2];
+    break;
+  case _draw_modes::LINES:
+    DrawModes[8] = !DrawModes[8];
+    break;
+  case _draw_modes::SMOOTH:
+    DrawModes[4] = !DrawModes[4];
+
+    break;
+  case _draw_modes::FLAT:
+    DrawModes[3] = !DrawModes[3];
+    break;
+  case _draw_modes::TEXTURE:
+    DrawModes[5] = !DrawModes[5];
+    break;
+  case _draw_modes::TEXTURE_FLAT:
+    DrawModes[6] = !DrawModes[6];
+    break;
+
+  case _draw_modes::TEXTURE_SMOOTH:
+    DrawModes[7] = !DrawModes[7];
+    break;
+  }
+  update();
+}
+
+void _gl_widget::ObjectType(_object ot)
+{
+  switch (ot)
+  {
+  case _object::OBJECT_TETRAHEDRON:
+    Object = _object::OBJECT_TETRAHEDRON;
+    break;
+  case _object::OBJECT_CUBE:
+    Object = _object::OBJECT_CUBE;
+    break;
+  case _object::OBJECT_CONE:
+    Object = _object::OBJECT_CONE;
+    break;
+  case _object::OBJECT_CYLINDER:
+    Object = _object::OBJECT_CYLINDER;
+    break;
+  case _object::OBJECT_SPHERE:
+    Object = _object::OBJECT_SPHERE;
+
+    break;
+  case _object::OBJECT_PLY:
+    Object = _object::OBJECT_PLY;
+    break;
+  case _object::OBJECT_PERRO:
+    Object = _object::OBJECT_PERRO;
+    break;
+  case _object::OBJECT_TABLERO:
+    Object = _object::OBJECT_TABLERO;
+    break;
+
+  case _object::MULTIPLE_OBJECTS:
+    Object = _object::MULTIPLE_OBJECTS;
+    break;
+
+  case _object::PLYS:
+    Object = _object::PLYS;
+    break;
+  }
+  update();
 }
