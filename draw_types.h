@@ -5,4 +5,4 @@
  * GPL 3
  */
 
-enum class _draw_modes{FILL,CHESS,POINTS,LINES,SMOOTH,FLAT} ;
+enum class _draw_modes_model{DEFAULT,FILL,CHESS,POINTS,LINES,SMOOTH,FLAT,TEXTURE,SELECTION} ;

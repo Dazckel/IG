@@ -13,6 +13,12 @@
 #include "draw_types.h"
 #include "object_types.h"
 
+#ifndef MODEL_PARAM 
+#include "model_param.h"
+#endif
+
+#include <string>
+
 /*****************************************************************************/ /**
  *
  *
@@ -27,19 +33,29 @@ public:
   vector<_vertex3f> NormalsT;
   vector<_vertex3f> NormalsV;
   vector<int> Veces_visitado;
-  vector<int> identifier;
   vector<_vertex2f> texture_coordinate;
+
   int nv_plantilla;
   int num_rot;
 
-  bool selected = false;
+  bool selected;
+  bool pick_model; //Para resaltar el objeto cuando es del modelo.
+
+  bool text;
   int n_triangle_selected;
+
+
+  //para asignar identificadores para el pick del modelo
+  int id_ini;
+  int id_fin;
+
+  string textura;
 
 
   void draw_line();
   void draw_fill();
   void draw_chess();
-
+  _object3D(_opciones op = _opciones::OP1);
   void draw_lighted_smooth(_object obj);
   void draw_lighted_flat();
   void compute_normals_vertex();
@@ -51,7 +67,7 @@ public:
   void draw_texture();
 
 
-void draw_selection();
+  int draw_selection(int id = 1);
 
 };
 

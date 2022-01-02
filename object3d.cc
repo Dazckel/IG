@@ -16,37 +16,84 @@
 #include "QObject"
 
 using namespace _colors_ne;
+_object3D::_object3D(_opciones op)
+{
+  switch (op)
+  {
+  case _opciones::OP1:
+    textura += "../texturas/2k_mars.jpg";
+    break;
 
-void _object3D::draw_selection()
+  case _opciones::OP2:
+    textura += "../texturas/2k_stars.jpg";
+    break;
+
+  case _opciones::OP3:
+    textura += "../texturas/2k_sun.jpg";
+    break;
+
+  case _opciones::OP4:
+    textura += "../texturas/2k_venus_surface.jpg";
+    break;
+
+  case _opciones::OP5:
+    textura += "../texturas/mercury.jpg";
+    break;
+
+  case _opciones::OP6:
+    textura += "../texturas/2k_earth_nightmap.jpg";
+    break;
+  }
+  selected = false;
+  pick_model = false;
+  id_ini = 0;
+  id_fin = 0;
+  n_triangle_selected = 0;
+  nv_plantilla = 0;
+  num_rot = 0;
+}
+
+
+////////////////////////////////////////////////
+//////////////  PICK
+////////////////////////////////////////////////
+
+int _object3D::draw_selection(int id)
 {
   //Le asigno a cada triangulo un color que es su identificador.
   int size = Triangles.size();
 
   glBegin(GL_TRIANGLES);
   glPolygonMode(GL_FRONT, GL_FILL);
-  for (int i = 0; i < size; i++)
+  int i;
+  for (i = id; i < size + id; i++)
   {
-    _vertex3f *Color;
+    _vertex3f *Color = new _vertex3f();
     Color->r = (i & 0x00FF0000) >> 16;
     Color->g = (i & 0x0000FF00) >> 8;
     Color->b = i & 0x000000FF;
     (*Color) = (*Color) / 255.0;
 
     glColor3fv((GLfloat *)Color);
-    glVertex3fv((GLfloat *)&Vertices[Triangles[i]._0]);
-    glVertex3fv((GLfloat *)&Vertices[Triangles[i]._1]);
-    glVertex3fv((GLfloat *)&Vertices[Triangles[i]._2]);
+    glVertex3fv((GLfloat *)&Vertices[Triangles[i - id]._0]);
+    glVertex3fv((GLfloat *)&Vertices[Triangles[i - id]._1]);
+    glVertex3fv((GLfloat *)&Vertices[Triangles[i - id]._2]);
 
     delete (Color);
   }
   glEnd();
+  return i;
 }
 
 /*****************************************************************************/ /**
  *
- *
+ *            LUCES
  *
  *****************************************************************************/
+
+////////////////////////////////////////////////
+//////////////  SMOOTH
+////////////////////////////////////////////////
 void _object3D::draw_lighted_smooth(_object obj)
 {
 
@@ -57,7 +104,7 @@ void _object3D::draw_lighted_smooth(_object obj)
 
   //la posición del usuario influye en el calculo de la especularidad
   glEnable(GL_LIGHTING);
-  glEnable(GL_RESCALE_NORMAL);
+  glEnable(GL_NORMALIZE);
   glPolygonMode(GL_FRONT, GL_FILL);
 
   glBegin(GL_TRIANGLES);
@@ -75,10 +122,13 @@ void _object3D::draw_lighted_smooth(_object obj)
   }
   glEnd();
 
-  glDisable(GL_RESCALE_NORMAL);
+  glDisable(GL_NORMALIZE);
   glDisable(GL_LIGHTING);
 }
 
+////////////////////////////////////////////////
+//////////////  FLAT
+////////////////////////////////////////////////
 void _object3D::draw_lighted_flat()
 {
 
@@ -87,7 +137,7 @@ void _object3D::draw_lighted_flat()
   //la posición del usuario influye en el calculo de la especularidad
 
   glEnable(GL_LIGHTING);
-  glEnable(GL_RESCALE_NORMAL);
+  glEnable(GL_NORMALIZE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   glBegin(GL_TRIANGLES);
@@ -101,9 +151,10 @@ void _object3D::draw_lighted_flat()
   }
   glEnd();
 
-  glDisable(GL_RESCALE_NORMAL);
+  glDisable(GL_NORMALIZE);
   glDisable(GL_LIGHTING);
 }
+
 
 void _object3D::compute_normals_vertex()
 {
@@ -123,14 +174,9 @@ void _object3D::compute_normals_vertex()
   {
     _vertex3f A = Vertices[Triangles[i]._0] - Vertices[Triangles[i]._1];
     _vertex3f B = Vertices[Triangles[i]._2] - Vertices[Triangles[i]._1];
-    _vertex3f Normal;
+    _vertex3f Normal = B.cross_product(A);
 
-    Normal._0 = A.y * B.z - A.z * B.y;
-    Normal._1 = A.z * B.x - A.x * B.z;
-    Normal._2 = A.x * B.y - A.y * B.x;
-
-    Normal.normalize();
-    NormalsT[i] = Normal;
+    NormalsT[i] = Normal.normalize();
 
     NormalsV[Triangles[i]._0] += Normal;
     Veces_visitado[Triangles[i]._0]++;
@@ -151,11 +197,7 @@ void _object3D::compute_normals_vertex_sphere()
   for (int i = 0; i < tamV; i++)
   {
     _vertex3f NormalV = Vertices[i];
-    double mod = sqrt(pow(NormalV.x, 2.0) + pow(NormalV.y, 2.0) + pow(NormalV.z, 2.0));
-    NormalV.x /= mod;
-    NormalV.y /= mod;
-    NormalV.z /= mod;
-    NormalsV[i] = NormalV;
+    NormalsV[i] = NormalV.normalize();
   }
 }
 
@@ -170,24 +212,24 @@ void _object3D::compute_normals_triangles()
     _vertex3f B = Vertices[Triangles[i]._2] - Vertices[Triangles[i]._1];
     _vertex3f Normal;
 
-    Normal._0 = A.y * B.z - A.z * B.y;
-    Normal._1 = A.z * B.x - A.x * B.z;
-    Normal._2 = A.x * B.y - A.y * B.x;
-
-    double mod = sqrt(pow(Normal.x, 2.0) + pow(Normal.y, 2.0) + pow(Normal.z, 2.0));
-    Normal.x /= mod;
-    Normal.y /= mod;
-    Normal.z /= mod;
-    NormalsT[i] = Normal;
+    Normal = B.cross_product(A);
+    NormalsT[i] = Normal.normalize();
   }
 }
+
+
+/*****************************************************************************/ /**
+ *
+ *      BÁSICOS
+ *
+ *****************************************************************************/
 
 void _object3D::draw_line()
 {
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glBegin(GL_TRIANGLES);
-
+  glColor3fv((GLfloat *)&RED);
   int Vertex_1, Vertex_2, Vertex_3;
 
   for (unsigned int i = 0; i < Triangles.size(); i++)
@@ -205,47 +247,55 @@ void _object3D::draw_line()
   glEnd();
 }
 
-/*****************************************************************************/ /**
- *
- *
- *
- *****************************************************************************/
+
 
 void _object3D::draw_fill()
 {
+  int size = Triangles.size();
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glBegin(GL_TRIANGLES);
 
-  int Vertex_1, Vertex_2, Vertex_3;
-
-  for (unsigned int i = 0; i < Triangles.size(); i++)
-  {
-    glColor3fv((GLfloat *)&GREEN);
-
-    glVertex3fv((GLfloat *)&Vertices[Triangles[i]._0]);
-    glVertex3fv((GLfloat *)&Vertices[Triangles[i]._1]);
-    glVertex3fv((GLfloat *)&Vertices[Triangles[i]._2]);
-  }
   if (selected)
   {
-    glColor3fv((GLfloat *)&GREEN);
-    Vertex_1 = Triangles[n_triangle_selected]._0;
-    Vertex_2 = Triangles[n_triangle_selected]._1;
-    Vertex_3 = Triangles[n_triangle_selected]._2;
 
-    glVertex3fv((GLfloat *)&Vertices[Vertex_1]);
-    glVertex3fv((GLfloat *)&Vertices[Vertex_2]);
-    glVertex3fv((GLfloat *)&Vertices[Vertex_3]);
+    for (int i = 0; i < n_triangle_selected; i++)
+    {
+      glColor3fv((GLfloat *)&BLUE);
+
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._0]);
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._1]);
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._2]);
+    }
+    glColor4f(1.0f, 1.0f, 0.0f, 0.0f);
+
+    glVertex3fv((GLfloat *)&Vertices[Triangles[n_triangle_selected]._0]);
+    glVertex3fv((GLfloat *)&Vertices[Triangles[n_triangle_selected]._1]);
+    glVertex3fv((GLfloat *)&Vertices[Triangles[n_triangle_selected]._2]);
+
+    for (int i = n_triangle_selected + 1; i < size; i++)
+    {
+      glColor3fv((GLfloat *)&BLUE);
+
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._0]);
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._1]);
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._2]);
+    }
+  }
+  else
+  {
+    for (int i = 0; i < size; i++)
+    {
+      glColor3fv((GLfloat *)&BLUE);
+
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._0]);
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._1]);
+      glVertex3fv((GLfloat *)&Vertices[Triangles[i]._2]);
+    }
   }
 
   glEnd();
 }
 
-/*****************************************************************************/ /**
- *
- *
- *
- *****************************************************************************/
 
 void _object3D::draw_chess()
 {
@@ -275,7 +325,12 @@ void _object3D::draw_chess()
   glEnd();
 }
 
-//texturas
+
+/*****************************************************************************/ /**
+ *
+ *          TEXTURAS
+ *
+ *****************************************************************************/
 
 void _object3D::draw_texture_flat()
 {
@@ -283,7 +338,7 @@ void _object3D::draw_texture_flat()
   compute_normals_triangles();
 
   // Code for reading an image
-  QString File_name("../texturas/bb.jpg");
+  QString File_name(textura.c_str());
   QImage Image;
   QImageReader Reader(File_name);
   Reader.setAutoTransform(true);
@@ -308,13 +363,12 @@ void _object3D::draw_texture_flat()
   int p = 0;
   float fact_y = 1.0f / nv_plantilla;
   float fact_x = 1.0f / num_rot;
-  int o = Vertices.size();
   for (int i = 0; i <= num_rot; i++)
     for (int j = 0; j < nv_plantilla; j++, p++)
-      texture_coordinate[o - 1 - p] = _vertex2f(i * fact_x, j * fact_y);
+      texture_coordinate[p] = _vertex2f(i * fact_x, j * fact_y);
 
   glEnable(GL_LIGHTING);
-  glEnable(GL_RESCALE_NORMAL);
+  glEnable(GL_NORMALIZE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_TEXTURE_2D);
   glBegin(GL_TRIANGLES);
@@ -329,16 +383,17 @@ void _object3D::draw_texture_flat()
     glTexCoord2fv((GLfloat *)&texture_coordinate[Triangles[i]._2]);
     glVertex3fv((GLfloat *)&Vertices[Triangles[i]._2]);
   }
+  
   glEnd();
   glDisable(GL_TEXTURE_2D);
-  glDisable(GL_RESCALE_NORMAL);
+  glDisable(GL_NORMALIZE);
   glDisable(GL_LIGHTING);
 }
 
 void _object3D::draw_texture()
 {
   // Code for reading an image
-  QString File_name("../texturas/pablo-motos.jpeg");
+  QString File_name(textura.c_str());
   QImage Image;
   QImageReader Reader(File_name);
   Reader.setAutoTransform(true);
@@ -368,10 +423,9 @@ void _object3D::draw_texture()
   int p = 0;
   float fact_y = 1.0f / nv_plantilla;
   float fact_x = 1.0f / num_rot;
-  int o = Vertices.size();
   for (int i = 0; i <= num_rot; i++)
     for (int j = 0; j < nv_plantilla; j++, p++)
-      texture_coordinate[o - 1 - p] = _vertex2f(i * fact_x, j * fact_y);
+      texture_coordinate[p] = _vertex2f(i * fact_x, j * fact_y);
 
   glEnable(GL_TEXTURE_2D);
   glBegin(GL_TRIANGLES);
@@ -399,7 +453,7 @@ void _object3D::draw_texture_smooth(_object obj)
     compute_normals_vertex_sphere();
 
   // Code for reading an image
-  QString File_name("../texturas/bb.jpg");
+  QString File_name(textura.c_str());
   QImage Image;
   QImageReader Reader(File_name);
   Reader.setAutoTransform(true);
@@ -424,13 +478,12 @@ void _object3D::draw_texture_smooth(_object obj)
   int p = 0;
   float fact_y = 1.0f / nv_plantilla;
   float fact_x = 1.0f / num_rot;
-  int o = Vertices.size();
   for (int i = 0; i <= num_rot; i++)
     for (int j = 0; j < nv_plantilla; j++, p++)
-      texture_coordinate[o - 1 - p] = _vertex2f(i * fact_x, j * fact_y);
+      texture_coordinate[p] = _vertex2f(i * fact_x, j * fact_y);
 
   glEnable(GL_LIGHTING);
-  glEnable(GL_RESCALE_NORMAL);
+  glEnable(GL_NORMALIZE);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   glEnable(GL_TEXTURE_2D);
@@ -450,6 +503,6 @@ void _object3D::draw_texture_smooth(_object obj)
   }
   glEnd();
   glDisable(GL_TEXTURE_2D);
-  glDisable(GL_RESCALE_NORMAL);
+  glDisable(GL_NORMALIZE);
   glDisable(GL_LIGHTING);
 }

@@ -12,7 +12,7 @@
 class _sphere: public _revolution
 {
     public:
-    _sphere();
+    _sphere(eje e = eje::EJE_Y,bool textura = false);
 };
 
 #endif

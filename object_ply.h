@@ -11,11 +11,20 @@
 #include "object3d.h"
 #include "file_ply_stl.h"
 
+#ifndef MODEL_PARAM
+#include "model_param.h"
+#endif
+
+#include <string>
+
 
 class _ply : public _object3D
 {
     public:
-        _ply();
+        _ply(_opciones op  =_opciones::OP1);
+
+    private:
+        string fichero;
 };
 
 #endif

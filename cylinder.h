@@ -12,7 +12,7 @@
 class _cylinder: public _revolution
 {
     public:
-    _cylinder();
+    _cylinder(eje e = eje::EJE_Y,bool textura = false);
 };
 
 #endif

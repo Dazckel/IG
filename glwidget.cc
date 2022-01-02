@@ -32,12 +32,6 @@ _gl_widget::_gl_widget(_window *Window1) : Window(Window1)
  *
  *****************************************************************************/
 
-/*
-Reimplenetar la funcion
-mouspress
-mousmove
-*/
-
 // Skeleton for pick fuction using glDeleteFramebuffers
 //
 // Domingo Martín Perandrés
@@ -89,34 +83,35 @@ void _gl_widget::pick()
   switch (Object)
   {
   case OBJECT_TETRAHEDRON:
-    Tetrahedron.draw_selection();
-    Tetrahedron.selected = false;
+    Tetrahedron->draw_selection();
+    Tetrahedron->selected = false;
     break;
   case OBJECT_CUBE:
-    Cube.draw_selection();
-    Cube.selected = false;
+    Cube->draw_selection();
+    Cube->selected = false;
     break;
   //
   case OBJECT_CYLINDER:
-    Cylinder.draw_selection();
-    Cylinder.selected = false;
+    Cylinder->draw_selection();
+    Cylinder->selected = false;
     break;
   case OBJECT_CONE:
-    Cone.draw_selection();
-    Tetrahedron.selected = false;
+    Cone->draw_selection();
+    Cone->selected = false;
     break;
   case OBJECT_SPHERE:
-    Sphere.draw_selection();
-    Sphere.selected = false;
+    Sphere->draw_selection();
+    Sphere->selected = false;
     break;
   case OBJECT_PLY:
-    Ply.draw_selection();
-    Ply.selected = false;
+    Ply->draw_selection();
+    Ply->selected = false;
     break;
   case OBJECT_TABLERO:
     Tablero.draw_selection();
     Tablero.selected = false;
     break;
+
   case MULTIPLE_OBJECTS:
     id = 1;
     id_fin = 1;
@@ -126,14 +121,13 @@ void _gl_widget::pick()
       glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
       glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
-      id_fin = objetos[i].draw_selection(id);
-      objetos[i].selected = false;
-      pair<int, int> aux(id, id_fin);
-      rangos_id[i] = aux;
+      id_fin = objetos[i]->draw_selection(id);
+      objetos[i]->selected = false;
+      objetos[i]->id_fin = id_fin;
+      objetos[i]->id_ini = id;
       id = id_fin;
       glPopMatrix();
     }
-
     break;
   case PLYS:
     id = 1;
@@ -148,15 +142,27 @@ void _gl_widget::pick()
         glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
         id_fin = vector_plys[p].draw_selection(id);
         vector_plys[p].selected = false;
-        pair<int, int> aux(id, id_fin);
-        rangos_id_ply[p] = aux;
+        vector_plys[p].id_fin = id_fin;
+        vector_plys[p].id_ini = id;
         id = id_fin;
         glPopMatrix();
       }
 
     break;
-  case OBJECT_PERRO:
-    perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, _draw_modes_model::SELECTION);
+  case OBJECT_SPOT:
+    id = 1;
+    id_fin = 1;
+    int sz = model_objects.size();
+    for (int i = 0; i < sz; i++)
+    {
+      int Nt = model_objects[i]->Triangles.size();
+      model_objects[i]->id_ini = id;
+      model_objects[i]->id_fin = Nt + id;
+      model_objects[i]->selected = false;
+      model_objects[i]->pick_model = false;
+      id = Nt + id;
+    }
+    dogocopter->Draw_xxx(_draw_modes_model::SELECTION);
     break;
   }
   /*************************/
@@ -174,71 +180,91 @@ void _gl_widget::pick()
   uint R = uint((Color & 0x000000FF));
 
   int Selected_triangle = (R << 16) + (G << 8) + B;
-  cout << Selected_triangle << endl;
   if (Selected_triangle == 16777215)
     Selected_triangle = -1;
-  switch (Object)
+
+  if (Selected_triangle > 0)
   {
-  case OBJECT_TETRAHEDRON:
-    Tetrahedron.selected = true;
-    Tetrahedron.n_triangle_selected = Selected_triangle;
-    break;
-  case OBJECT_CUBE:
-    Cube.selected = true;
-    Cube.n_triangle_selected = Selected_triangle;
-    break;
-  //
-  case OBJECT_CYLINDER:
-    Cylinder.selected = true;
-    Cylinder.n_triangle_selected = Selected_triangle;
-    break;
-  case OBJECT_CONE:
-    Cone.selected = true;
-    Cone.n_triangle_selected = Selected_triangle;
-    break;
-  case OBJECT_SPHERE:
-    Sphere.selected = true;
-    Sphere.n_triangle_selected = Selected_triangle;
-    break;
-  case OBJECT_PLY:
-    Ply.selected = true;
-    Ply.n_triangle_selected = Selected_triangle;
-    break;
-  case OBJECT_TABLERO:
-    Tablero.selected = true;
-    Tablero.n_triangle_selected = Selected_triangle;
-    break;
-  case MULTIPLE_OBJECTS:
-
-    for (int i = 0; i < objetos_size; i++)
+    Selected_triangle--;
+    switch (Object)
     {
-      if ((rangos_id[i].first <= Selected_triangle) && (rangos_id[i].second > Selected_triangle))
+    case OBJECT_TETRAHEDRON:
+      Tetrahedron->selected = true;
+      Tetrahedron->n_triangle_selected = Selected_triangle;
+      break;
+    case OBJECT_CUBE:
+      Cube->selected = true;
+      Cube->n_triangle_selected = Selected_triangle;
+      break;
+    //
+    case OBJECT_CYLINDER:
+      Cylinder->selected = true;
+      Cylinder->n_triangle_selected = Selected_triangle;
+      break;
+    case OBJECT_CONE:
+      Cone->selected = true;
+      Cone->n_triangle_selected = Selected_triangle;
+      break;
+    case OBJECT_SPHERE:
+      Sphere->selected = true;
+      Sphere->n_triangle_selected = Selected_triangle;
+      break;
+    case OBJECT_PLY:
+      Ply->selected = true;
+      Ply->n_triangle_selected = Selected_triangle;
+      break;
+    case OBJECT_TABLERO:
+      Tablero.selected = true;
+      Tablero.n_triangle_selected = Selected_triangle;
+      break;
+    case MULTIPLE_OBJECTS:
+      Selected_triangle++;
+      for (int i = 0; i < objetos_size; i++)
       {
-        Selected_triangle -= rangos_id[i].first;
-        objetos[i].n_triangle_selected = Selected_triangle;
-        objetos[i].selected = true;
-        the_one_object = i;
+        if ((objetos[i]->id_ini <= Selected_triangle) && (objetos[i]->id_fin > Selected_triangle))
+        {
+          Selected_triangle -= objetos[i]->id_ini;
+          objetos[i]->n_triangle_selected = Selected_triangle;
+          objetos[i]->selected = true;
+          the_one_object = i;
+        }
       }
-    }
-    break;
+      break;
 
-  case PLYS:
-    for (int i = 0; i < size_ply * size_ply; i++)
-    {
-      if ((rangos_id_ply[i].first <= Selected_triangle) && (rangos_id_ply[i].second > Selected_triangle))
+    case PLYS:
+      Selected_triangle++;
+      for (int i = 0; i < size_ply * size_ply; i++)
       {
-        Selected_triangle -= rangos_id_ply[i].first;
-        vector_plys[i].n_triangle_selected = Selected_triangle;
-        vector_plys[i].selected = true;
-        the_one_ply = i;
+        if ((vector_plys[i].id_ini <= Selected_triangle) && (vector_plys[i].id_fin > Selected_triangle))
+        {
+          //Por esto hago "Selected_triangle++" por que si he seleccionado el primer triangulo (0)
+          //si le resto el id==1 ( para saber si corresponde a ese objeto) falla.
+          Selected_triangle -= vector_plys[i].id_ini;
+          vector_plys[i].n_triangle_selected = Selected_triangle;
+          vector_plys[i].selected = true;
+          the_one_ply = i;
+        }
       }
+      break;
+    case OBJECT_SPOT:
+      Selected_triangle++;
+      int size = model_objects.size();
+      for (int i = 0; i < size; i++)
+      {
+        if ((model_objects[i]->id_ini <= Selected_triangle) && (model_objects[i]->id_fin > Selected_triangle))
+        {
+
+          //Por esto hago "Selected_triangle++" por que si he seleccionado el primer triangulo (0)
+          //si le resto el id==1 ( para saber si corresponde a ese objeto) falla.
+          int aux = Selected_triangle - model_objects[i]->id_ini;
+          model_objects[i]->n_triangle_selected = aux;
+          model_objects[i]->selected = true;
+          model_objects[i]->pick_model = true;
+        }
+      }
+      break;
     }
-    break;
-  case OBJECT_PERRO:
-    perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, _draw_modes_model::SELECTION);
-    break;
   }
-
   glUseProgram(0);
   glBindVertexArray(0);
   /*************************/
@@ -248,57 +274,6 @@ void _gl_widget::pick()
   glDeleteFramebuffers(1, &FBO);
   // the normal framebuffer takes the control of drawing
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFramebufferObject());
-  switch (Object)
-  {
-  case OBJECT_TETRAHEDRON:
-    Tetrahedron.draw_fill();
-    break;
-  case OBJECT_CUBE:
-    Cube.draw_fill();
-    break;
-  //
-  case OBJECT_CYLINDER:
-    Cylinder.draw_fill();
-    break;
-  case OBJECT_CONE:
-    Cone.draw_fill();
-    break;
-  case OBJECT_SPHERE:
-    Sphere.draw_fill();
-    break;
-  case OBJECT_PLY:
-    Ply.draw_fill();
-    break;
-  case OBJECT_PERRO:
-    draw_model(_draw_modes_model::FILL);
-    break;
-  case OBJECT_TABLERO:
-    Tablero.draw_fill();
-    break;
-  case MULTIPLE_OBJECTS:
-
-    for (int i = 0; i < objetos_size; i++)
-    {
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
-      glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
-      objetos[i].draw_fill();
-      glPopMatrix();
-    }
-    break;
-  case PLYS:
-    p = 0;
-    for (int i = 0; i < size_ply; i++)
-      for (int j = 0; j < size_ply; j++, p++)
-      {
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glTranslated((size_ply + separacion) * i - size_ply * separacion, -separacion * size_ply / 2 + j * separacion, 0);
-        vector_plys[p].draw_fill();
-        glPopMatrix();
-      }
-    break;
-  }
 }
 
 void _gl_widget::mousePressEvent(QMouseEvent *Event)
@@ -371,102 +346,29 @@ void _gl_widget::mouseMoveEvent(QMouseEvent *event)
   }
 }
 
-void _gl_widget::keyPressEvent(QKeyEvent *Keyevent)
+void _gl_widget::wheelEvent(QWheelEvent *event)
 {
-
-  switch (Keyevent->key())
+  float rat = 0.935;
+  int numDegrees = event->angleDelta().ry() / 120;
+  if (numDegrees > 0)
   {
-  case Qt::Key_M:
-    material = (material + 1) % 3;
-    break;
-  case Qt::Key_J:
-    first_light = !first_light;
-    break;
-  case Qt::Key_K:
-    second_light = !second_light;
-
-    break;
-  case Qt::Key_Q:
-    opcion = _gl_widget_ne::_opciones::OP1;
-    break;
-  case Qt::Key_W:
-    opcion = _gl_widget_ne::_opciones::OP2;
-    break;
-  case Qt::Key_E:
-    opcion = _gl_widget_ne::_opciones::OP3;
-    break;
-  case Qt::Key_R:
-    opcion = _gl_widget_ne::_opciones::OP4;
-    break;
-
-  case Qt::Key_T:
-    opcion = _gl_widget_ne::_opciones::OP5;
-    break;
-  case Qt::Key_Y:
-    opcion = _gl_widget_ne::_opciones::OP6;
-    break;
-  case Qt::Key_U:
-    opcion = _gl_widget_ne::_opciones::OP7;
-    break;
-  case Qt::Key_I:
-    opcion = _gl_widget_ne::_opciones::OP8;
-    break;
-
-  case Qt::Key_A:
-    opcion = _gl_widget_ne::_opciones::OP9;
-    break;
-  case Qt::Key_S:
-    opcion = _gl_widget_ne::_opciones::OP10;
-    break;
-  case Qt::Key_Z:
-    opcion = _gl_widget_ne::_opciones::OP11;
-    break;
-  case Qt::Key_X:
-    opcion = _gl_widget_ne::_opciones::OP12;
-    break;
-    //
-  case Qt::Key_C:
-    projection = false;
-    break;
-  case Qt::Key_V:
-    projection = true;
-    break;
-  case Qt::Key_Left:
-    Observer_angle_y -= ANGLE_STEP;
-    break;
-  case Qt::Key_Right:
-    Observer_angle_y += ANGLE_STEP;
-    break;
-  case Qt::Key_Up:
-    Observer_angle_x -= ANGLE_STEP;
-    break;
-  case Qt::Key_Down:
-    Observer_angle_x += ANGLE_STEP;
-    break;
-  case Qt::Key_PageUp:
-    Observer_distance *= 1.2;
-    break;
-  case Qt::Key_PageDown:
-    Observer_distance /= 1.2;
-    break;
-
-  case Qt::Key_Plus:
-    X_MIN_O *= .7;
-    Y_MIN_O *= .7;
-    X_MAX_O *= .7;
-    Y_MAX_O *= .7;
-    break;
-  case Qt::Key_Minus:
-    X_MIN_O /= .7;
-    Y_MIN_O /= .7;
-    X_MAX_O /= .7;
-    Y_MAX_O /= .7;
-    break;
+    Observer_distance /= .9 * abs(numDegrees);
+    X_MIN_O *= rat * numDegrees;
+    Y_MIN_O *= rat * numDegrees;
+    X_MAX_O *= rat * numDegrees;
+    Y_MAX_O *= rat * numDegrees;
+  }
+  else
+  {
+    Observer_distance *= .9 * abs(numDegrees);
+    X_MIN_O /= rat * abs(numDegrees);
+    Y_MIN_O /= rat * abs(numDegrees);
+    X_MAX_O /= rat * abs(numDegrees);
+    Y_MAX_O /= rat * abs(numDegrees);
   }
 
   update();
 }
-
 /*****************************************************************************/ /**
  * Limpiar ventana
  *
@@ -511,89 +413,6 @@ void _gl_widget::change_observer()
  *
  *****************************************************************************/
 
-void _gl_widget::idle()
-{
-  float fa = (9.0 / 60.0);
-
-  switch (F)
-  {
-
-  case _fases::F1:
-    if (fac_lv4d_1d < 90)
-    {
-      fac_lv4d_1d += gr3 * 1;
-      if (fac_lv4d_2d < 9)
-        fac_lv4d_2d += 0.1 * gr4;
-      if (fac_lv3_1d > -90)
-        fac_lv3_1d -= 1 * gr1;
-    }
-    else
-      F = _fases::F2;
-    break;
-
-  case _fases::F2:
-    if (fac_lv4t_1d > -90)
-    {
-      fac_lv4t_1d -= 1 * gr3;
-      if (fac_lv4d_2d > 0)
-        fac_lv4d_2d -= 0.1 * gr4;
-      if (fac_lv4d_1d > 0)
-        fac_lv4d_1d -= 1 * gr3;
-      if (fac_lv3_1d < 0)
-        fac_lv3_1d += 1 * gr1;
-      if (fac_lv4t_2d < 9)
-        fac_lv4t_2d += 0.1 * gr4;
-      if (fac_lv3_2d < 4.5)
-        fac_lv3_2d += 0.05 * gr2;
-    }
-    else
-      F = _fases::F3;
-
-    break;
-  case _fases::F3:
-    if (fac_lv4d_1d > -60)
-    {
-      fac_lv4d_1d -= 1 * gr3;
-      if (fac_lv5_1d < 90)
-        fac_lv5_1d += 1.5 * gr5;
-      if (fac_lv3_1d > -60)
-        fac_lv3_1d -= 1 * gr1;
-      if (fac_lv4t_1d < 60)
-        fac_lv4t_1d += 2.5 * gr3;
-      if (fac_lv3_2d > 0)
-        fac_lv3_2d -= 0.075 * gr2;
-      if (fac_lv5_2d < 4.5)
-        fac_lv5_2d += 0.075 * gr6;
-    }
-    else
-      F = _fases::F4;
-    break;
-
-  case _fases::F4:
-    if (fac_lv4t_1d > 0)
-    {
-      fac_lv4t_1d -= 1 * gr3;
-      if (fac_lv3_1d > -90)
-        fac_lv3_1d -= 0.5 * gr1;
-      if (fac_lv4d_1d < 90)
-        fac_lv4d_1d += 2.5 * gr3;
-      if (fac_lv4t_2d > 0)
-        fac_lv4t_2d -= fa * gr4;
-      if (fac_lv4d_2d < 9)
-        fac_lv4d_2d += fa * gr4;
-      if (fac_lv5_1d > 0)
-        fac_lv5_1d -= 1.5 * gr5;
-      if (fac_lv5_2d > 0)
-        fac_lv5_2d -= 0.075 * gr6;
-    }
-    else
-      F = _fases::F2;
-    break;
-  }
-
-  update();
-}
-
 void _gl_widget::draw_objects()
 {
   Axis.draw_line();
@@ -604,29 +423,54 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_point();
+      Tetrahedron->draw_point();
       break;
     case OBJECT_CUBE:
-      Cube.draw_point();
+      Cube->draw_point();
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_point();
+      Cylinder->draw_point();
       break;
     case OBJECT_CONE:
-      Cone.draw_point();
+      Cone->draw_point();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_point();
+      Sphere->draw_point();
       break;
     case OBJECT_PLY:
-      Ply.draw_point();
+      Ply->draw_point();
       break;
     case OBJECT_TABLERO:
       Tablero.draw_point();
       break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::POINTS);
+    case OBJECT_SPOT:
+      dogocopter->Draw_xxx(_draw_modes_model::POINTS);
+      break;
+    case MULTIPLE_OBJECTS:
+
+      for (int i = 0; i < objetos_size; i++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+        objetos[i]->draw_point();
+        glPopMatrix();
+      }
+
+      break;
+    case PLYS:
+      int p = 0;
+      for (int i = 0; i < size_ply; i++)
+        for (int j = 0; j < size_ply; j++, p++)
+        {
+          glMatrixMode(GL_MODELVIEW);
+          glPushMatrix();
+          glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+          vector_plys[p].draw_point();
+          glPopMatrix();
+        }
+
       break;
     }
   }
@@ -638,29 +482,54 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_line();
+      Tetrahedron->draw_line();
       break;
     case OBJECT_CUBE:
-      Cube.draw_line();
+      Cube->draw_line();
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_line();
+      Cylinder->draw_line();
       break;
     case OBJECT_CONE:
-      Cone.draw_line();
+      Cone->draw_line();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_line();
+      Sphere->draw_line();
       break;
     case OBJECT_PLY:
-      Ply.draw_line();
+      Ply->draw_line();
       break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::LINES);
+    case OBJECT_SPOT:
+      dogocopter->Draw_xxx(_draw_modes_model::LINES);
       break;
     case OBJECT_TABLERO:
       Tablero.draw_line();
+      break;
+    case MULTIPLE_OBJECTS:
+
+      for (int i = 0; i < objetos_size; i++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+        objetos[i]->draw_line();
+        glPopMatrix();
+      }
+
+      break;
+    case PLYS:
+      int p = 0;
+      for (int i = 0; i < size_ply; i++)
+        for (int j = 0; j < size_ply; j++, p++)
+        {
+          glMatrixMode(GL_MODELVIEW);
+          glPushMatrix();
+          glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+          vector_plys[p].draw_line();
+          glPopMatrix();
+        }
+
       break;
     }
   }
@@ -671,26 +540,26 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_fill();
+      Tetrahedron->draw_fill();
       break;
     case OBJECT_CUBE:
-      Cube.draw_fill();
+      Cube->draw_fill();
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_fill();
+      Cylinder->draw_fill();
       break;
     case OBJECT_CONE:
-      Cone.draw_fill();
+      Cone->draw_fill();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_fill();
+      Sphere->draw_fill();
       break;
     case OBJECT_PLY:
-      Ply.draw_fill();
+      Ply->draw_fill();
       break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::FILL);
+    case OBJECT_SPOT:
+      dogocopter->Draw_xxx(_draw_modes_model::FILL);
       break;
     case OBJECT_TABLERO:
       Tablero.draw_fill();
@@ -705,9 +574,9 @@ void _gl_widget::draw_objects()
         if (the_one_object == i)
         {
           glLineWidth(5);
-          objetos[the_one_object].draw_line();
+          objetos[the_one_object]->draw_line();
         }
-        objetos[i].draw_fill();
+        objetos[i]->draw_fill();
         glPopMatrix();
       }
 
@@ -744,29 +613,54 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_lighted_flat();
+      Tetrahedron->draw_lighted_flat();
       break;
     case OBJECT_CUBE:
-      Cube.draw_lighted_flat();
+      Cube->draw_lighted_flat();
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_lighted_flat();
+      Cylinder->draw_lighted_flat();
       break;
     case OBJECT_CONE:
-      Cone.draw_lighted_flat();
+      Cone->draw_lighted_flat();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_lighted_flat();
+      Sphere->draw_lighted_flat();
       break;
     case OBJECT_PLY:
-      Ply.draw_lighted_flat();
+      Ply->draw_lighted_flat();
       break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::FLAT);
+    case OBJECT_SPOT:
+      dogocopter->Draw_xxx(_draw_modes_model::FLAT);
       break;
     case OBJECT_TABLERO:
       Tablero.draw_lighted_flat();
+      break;
+    case MULTIPLE_OBJECTS:
+
+      for (int i = 0; i < objetos_size; i++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+        objetos[i]->draw_lighted_flat();
+        glPopMatrix();
+      }
+
+      break;
+    case PLYS:
+      int p = 0;
+      for (int i = 0; i < size_ply; i++)
+        for (int j = 0; j < size_ply; j++, p++)
+        {
+          glMatrixMode(GL_MODELVIEW);
+          glPushMatrix();
+          glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+          vector_plys[p].draw_lighted_flat();
+          glPopMatrix();
+        }
+
       break;
     }
   }
@@ -777,16 +671,13 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_CYLINDER:
-      Cylinder.draw_texture_flat();
+      Cylinder->draw_texture_flat();
       break;
     case OBJECT_CONE:
-      Cone.draw_texture_flat();
+      Cone->draw_texture_flat();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_texture_flat();
-      break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::TEXTURE);
+      Sphere->draw_texture_flat();
       break;
     case OBJECT_TABLERO:
       Tablero.draw_texture_flat();
@@ -801,16 +692,13 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_CYLINDER:
-      Cylinder.draw_texture_smooth(_object::OBJECT_CYLINDER);
+      Cylinder->draw_texture_smooth(_object::OBJECT_CYLINDER);
       break;
     case OBJECT_CONE:
-      Cone.draw_texture_smooth(_object::OBJECT_CONE);
+      Cone->draw_texture_smooth(_object::OBJECT_CONE);
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_texture_smooth(_object::OBJECT_SPHERE);
-      break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::TEXTURE);
+      Sphere->draw_texture_smooth(_object::OBJECT_SPHERE);
       break;
     case OBJECT_TABLERO:
       Tablero.draw_texture_smooth(_object::OBJECT_TABLERO);
@@ -824,30 +712,53 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_lighted_smooth(_object::OBJECT_TETRAHEDRON);
+      Tetrahedron->draw_lighted_smooth(_object::OBJECT_TETRAHEDRON);
       break;
     case OBJECT_CUBE:
-      Cube.draw_lighted_smooth(_object::OBJECT_CUBE);
+      Cube->draw_lighted_smooth(_object::OBJECT_CUBE);
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_lighted_smooth(_object::OBJECT_CYLINDER);
+      Cylinder->draw_lighted_smooth(_object::OBJECT_CYLINDER);
       break;
     case OBJECT_CONE:
-      Cone.draw_lighted_smooth(_object::OBJECT_CONE);
+      Cone->draw_lighted_smooth(_object::OBJECT_CONE);
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_lighted_smooth(_object::OBJECT_SPHERE);
+      Sphere->draw_lighted_smooth(_object::OBJECT_SPHERE);
       break;
     case OBJECT_PLY:
-      Ply.draw_lighted_smooth(_object::OBJECT_PLY);
+      Ply->draw_lighted_smooth(_object::OBJECT_PLY);
       break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::SMOOTH);
+    case OBJECT_SPOT:
+      dogocopter->Draw_xxx(_draw_modes_model::SMOOTH);
       break;
     case OBJECT_TABLERO:
       Tablero.draw_lighted_smooth(_object::OBJECT_TABLERO);
       break;
+    case MULTIPLE_OBJECTS:
+
+      for (int i = 0; i < objetos_size; i++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+        objetos[i]->draw_lighted_smooth(_object::OBJECT_CONE);
+        glPopMatrix();
+      }
+
+      break;
+    case PLYS:
+      int p = 0;
+      for (int i = 0; i < size_ply; i++)
+        for (int j = 0; j < size_ply; j++, p++)
+        {
+          glMatrixMode(GL_MODELVIEW);
+          glPushMatrix();
+          glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+          vector_plys[p].draw_lighted_smooth(_object::OBJECT_PLY);
+          glPopMatrix();
+        }
     }
   }
   if (first_light)
@@ -861,16 +772,13 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_CYLINDER:
-      Cylinder.draw_texture();
+      Cylinder->draw_texture();
       break;
     case OBJECT_CONE:
-      Cone.draw_texture();
+      Cone->draw_texture();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_texture();
-      break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::TEXTURE);
+      Sphere->draw_texture();
       break;
     case OBJECT_TABLERO:
       Tablero.draw_texture();
@@ -884,29 +792,54 @@ void _gl_widget::draw_objects()
     switch (Object)
     {
     case OBJECT_TETRAHEDRON:
-      Tetrahedron.draw_chess();
+      Tetrahedron->draw_chess();
       break;
     case OBJECT_CUBE:
-      Cube.draw_chess();
+      Cube->draw_chess();
       break;
     //
     case OBJECT_CYLINDER:
-      Cylinder.draw_chess();
+      Cylinder->draw_chess();
       break;
     case OBJECT_CONE:
-      Cone.draw_chess();
+      Cone->draw_chess();
       break;
     case OBJECT_SPHERE:
-      Sphere.draw_chess();
+      Sphere->draw_chess();
       break;
     case OBJECT_PLY:
-      Ply.draw_chess();
+      Ply->draw_chess();
       break;
-    case OBJECT_PERRO:
-      draw_model(_draw_modes_model::CHESS);
+    case OBJECT_SPOT:
+      dogocopter->Draw_xxx(_draw_modes_model::CHESS);
       break;
     case OBJECT_TABLERO:
       Tablero.draw_chess();
+      break;
+    case MULTIPLE_OBJECTS:
+
+      for (int i = 0; i < objetos_size; i++)
+      {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslated(((objetos_size + 2) / objetos_size) * i - objetos_size / 2, 0, 0);
+        objetos[i]->draw_chess();
+        glPopMatrix();
+      }
+
+      break;
+    case PLYS:
+      int p = 0;
+      for (int i = 0; i < size_ply; i++)
+        for (int j = 0; j < size_ply; j++, p++)
+        {
+          glMatrixMode(GL_MODELVIEW);
+          glPushMatrix();
+          glTranslated((size_ply + separacion) * i - size_ply * size_ply, -separacion * 2 + j * separacion, 0);
+          vector_plys[p].draw_chess();
+          glPopMatrix();
+        }
+
       break;
     }
   }
@@ -1026,15 +959,6 @@ void _gl_widget::initializeGL()
   flx = 1;
   fly = 1;
   flz = 1;
-  fac_lv3_1d = 0;
-  fac_lv3_2d = 0;
-  fac_lv4d_1d = 0;
-  fac_lv4d_2d = 0;
-  fac_lv4t_1d = 0;
-  fac_lv4t_2d = 0;
-  fac_lv5_1d = 0;
-  fac_lv5_2d = 0;
-
   gr1 = 1;
   gr2 = 1;
   gr3 = 1;
@@ -1042,8 +966,21 @@ void _gl_widget::initializeGL()
   gr5 = 1;
   gr6 = 1;
 
-  objetos = {Sphere, Cylinder, Cone, Tetrahedron, Cube};
+  Sphere = new _sphere;
+  Cylinder = new _cylinder;
+  Cone = new _cone;
+  Tetrahedron = new _tetrahedron;
+  Cube = new _cube;
+
+  _sphere* aSphere = new _sphere;
+  _cylinder* aCylinder = new _cylinder;
+  _cone* aCone = new _cone;
+  _tetrahedron* aTetrahedron = new _tetrahedron;
+  _cube* aCube = new _cube;
+
+  objetos = {aSphere, aCylinder, aCone, aTetrahedron, aCube};
   the_one_object = -1;
+  the_one_ply = -1;
   //Inicialización del vector de Plys.
   vector_plys.resize(size_ply * size_ply);
   for (int i = 0; i < size_ply * size_ply; i++)
@@ -1051,192 +988,33 @@ void _gl_widget::initializeGL()
     _ply aux;
     vector_plys[i] = aux;
   }
-  the_one_ply = -1;
-
   F = _fases::F1;
-  motion = _motion::ESTATICO;
-  opcion = _opciones::IDLE;
 
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(idle()));
 
-  rangos_id.resize((objetos.size()));
-  rangos_id_ply.resize(size_ply * size_ply);
-}
+  //Objetos del modelo
+  dogocopter = new _dogocopter;
 
-void _gl_widget::draw_model(_draw_modes_model dm)
-{
-  switch (motion)
+  for (int i = 0; i < 4; i++)
   {
-  case _gl_widget_ne::_motion::LEVEL_3:
-    switch (opcion)
-    {
-    case _gl_widget_ne::_opciones::OP1:
-      if (fac_lv3_1d < 0)
-        fac_lv3_1d += gr1;
-      break;
-
-    case _gl_widget_ne::_opciones::OP2:
-      if (fac_lv3_1d > -90)
-        fac_lv3_1d -= gr1;
-      break;
-
-    case _gl_widget_ne::_opciones::OP3:
-      fac_lv3_2d += gr2;
-      break;
-    case _gl_widget_ne::_opciones::OP4:
-      if (fac_lv3_2d > 0)
-        fac_lv3_2d -= gr2;
-      break;
-    }
-    break;
-
-  case _gl_widget_ne::_motion::LEVEL_4:
-    switch (opcion)
-    {
-
-    case _gl_widget_ne::_opciones::OP1:
-      if (fac_lv4d_1d < 90)
-        fac_lv4d_1d += gr3;
-      break;
-
-    case _gl_widget_ne::_opciones::OP2:
-      if (fac_lv4d_1d > -90)
-        fac_lv4d_1d -= gr3;
-      break;
-
-    case _gl_widget_ne::_opciones::OP3:
-      if (fac_lv4d_2d < 45 && (fac_lv4d_2d - fac_lv4t_2d) < 45)
-        fac_lv4d_2d += gr4;
-      break;
-    case _gl_widget_ne::_opciones::OP4:
-      if (fac_lv4d_2d > -45 && (fac_lv4d_2d - fac_lv4t_2d) > -45)
-        fac_lv4d_2d -= gr4;
-      break;
-
-      //TRASERAS
-
-    case _gl_widget_ne::_opciones::OP5:
-      if (fac_lv4t_1d < 90)
-        fac_lv4t_1d += gr3;
-      break;
-
-    case _gl_widget_ne::_opciones::OP6:
-      if (fac_lv4t_1d > -90)
-        fac_lv4t_1d -= gr3;
-      break;
-
-    case _gl_widget_ne::_opciones::OP7:
-      if (fac_lv4t_2d < 45 && (fac_lv4t_2d - fac_lv4d_2d) < 45)
-        fac_lv4t_2d += gr4;
-      break;
-    case _gl_widget_ne::_opciones::OP8:
-      if (fac_lv4t_2d > -45 && (fac_lv4t_2d - fac_lv4d_2d) > -45)
-        fac_lv4t_2d -= gr4;
-      break;
-    }
-    break;
-
-  case _gl_widget_ne::_motion::LEVEL_5:
-    switch (opcion)
-    {
-
-    case _gl_widget_ne::_opciones::OP1:
-      fac_lv5_1d += gr5;
-      break;
-
-    case _gl_widget_ne::_opciones::OP2:
-      fac_lv5_1d -= gr5;
-      break;
-
-    case _gl_widget_ne::_opciones::OP3:
-      fac_lv5_2d += gr6;
-      break;
-    case _gl_widget_ne::_opciones::OP4:
-      if (fac_lv5_2d > 0)
-        fac_lv5_2d -= gr6;
-      break;
-    }
-    break;
-
-    //AUMENTAR RATIO DE CAMBIO DE LOS GRADOS DE LIBERTAD
-  case _gl_widget_ne::_motion::GRADOS:
-
-    switch (opcion)
-    {
-
-    case _gl_widget_ne::_opciones::OP1:
-      gr1++;
-      break;
-
-    case _gl_widget_ne::_opciones::OP2:
-      if (gr1 > 1)
-        gr1--;
-      break;
-
-    case _gl_widget_ne::_opciones::OP3:
-      gr2++;
-      break;
-    case _gl_widget_ne::_opciones::OP4:
-      if (gr2 > 1)
-        gr2--;
-      break;
-
-    case _gl_widget_ne::_opciones::OP5:
-      gr3++;
-      break;
-
-    case _gl_widget_ne::_opciones::OP6:
-      if (gr3 > 1)
-        gr3--;
-      break;
-    case _gl_widget_ne::_opciones::OP7:
-      gr4++;
-      break;
-
-    case _gl_widget_ne::_opciones::OP8:
-      if (gr4 > 1)
-        gr4--;
-      break;
-
-    case _gl_widget_ne::_opciones::OP9:
-      gr5++;
-      break;
-
-    case _gl_widget_ne::_opciones::OP10:
-      if (gr5 > 1)
-        gr5--;
-      break;
-    case _gl_widget_ne::_opciones::OP11:
-      gr6++;
-      break;
-
-    case _gl_widget_ne::_opciones::OP12:
-      if (gr6 > 1)
-        gr6--;
-      break;
-    }
-
-    break;
-
-  case _gl_widget_ne::_motion::ANIMACION:
-
-    timer->start(20);
-    //Una vez activada la animación, volvemos al estado estático, si no se estaria llamando todo el rato
-    motion = _gl_widget_ne::_motion::ESTATICO;
-    animacion = true;
-    break;
-
-  case _gl_widget_ne::_motion::PARAR_ANIMACION:
-    timer->stop();
-    animacion = false;
-    motion = _gl_widget_ne::_motion::ESTATICO;
-    break;
+    model_objects.push_back(dogocopter->dog->legs[i]->femur);
+    model_objects.push_back(dogocopter->dog->legs[i]->shoulder);
+    model_objects.push_back(dogocopter->dog->legs[i]->forearm->forearm);
+    model_objects.push_back(dogocopter->dog->legs[i]->forearm->knee);
   }
-  opcion = _gl_widget_ne::_opciones::IDLE;
-  perro.Draw_xxx(fac_lv3_1d, fac_lv3_2d, fac_lv4d_1d, fac_lv4d_2d, fac_lv4t_1d, fac_lv4t_2d, fac_lv5_1d, fac_lv5_2d, dm);
+  model_objects.push_back(dogocopter->dog->body);
+
+  model_objects.push_back(dogocopter->gorrocopter->helixs[0]->helix);
+  model_objects.push_back(dogocopter->gorrocopter->helixs[1]->helix);
+  model_objects.push_back(dogocopter->gorrocopter->base);
+
+  Ply = new _ply;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+////////// OPCIONES PARA LA LUZ
+//////////////////////////////////////////////////////////////////////////////
 void _gl_widget::lights_options()
 {
   GLfloat mat_specular[] = {0.633, 0.727811, 0.633, 1};
@@ -1308,31 +1086,6 @@ void _gl_widget::lights_options()
     GLfloat lightDifuse1[] = {0.5, 0.0, 0.5, 1};
     //CONFIGURACIÓN LUZ
     //0
-    switch (opcion)
-    {
-    case _gl_widget_ne::_opciones::OP1:
-      flx = (flx + 2);
-      break;
-    case _gl_widget_ne::_opciones::OP2:
-      flx = (flx - 2);
-      break;
-    case _gl_widget_ne::_opciones::OP3:
-      fly = (fly + 2);
-      break;
-    case _gl_widget_ne::_opciones::OP4:
-      fly = (fly - 2);
-      break;
-
-    case _gl_widget_ne::_opciones::OP5:
-      flz = (flz + 2);
-      break;
-
-    case _gl_widget_ne::_opciones::OP6:
-      flz = (flz - 2);
-      break;
-    }
-    opcion = _gl_widget_ne::_opciones::IDLE;
-
     glLightfv(GL_LIGHT1, GL_DIFFUSE, (GLfloat *)&lightDifuse1);     //COMPONENTE DIFUSA
     glLightfv(GL_LIGHT1, GL_SPECULAR, (GLfloat *)&light_specular1); //COMPONENTE ESPECULAR
     glLightfv(GL_LIGHT1, GL_AMBIENT, (GLfloat *)&light_ambient1);   //COMONENTE AMBIENTAL
@@ -1356,32 +1109,132 @@ void _gl_widget::Modes(_draw_modes dm)
   switch (dm)
   {
   case _draw_modes::POINT:
+    if (Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, false);
+      Cylinder = new _cylinder(e, false);
+      Cone = new _cone(e, false);
+    }
     DrawModes[0] = !DrawModes[0];
     break;
   case _draw_modes::FILL:
+    if (Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, false);
+      Cylinder = new _cylinder(e, false);
+      Cone = new _cone(e, false);
+    }
     DrawModes[1] = !DrawModes[1];
     break;
   case _draw_modes::CHESS:
+    if (Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, false);
+      Cylinder = new _cylinder(e, false);
+      Cone = new _cone(e, false);
+    }
     DrawModes[2] = !DrawModes[2];
     break;
   case _draw_modes::LINES:
+    if (Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, false);
+      Cylinder = new _cylinder(e, false);
+      Cone = new _cone(e, false);
+    }
     DrawModes[8] = !DrawModes[8];
     break;
   case _draw_modes::SMOOTH:
+    if (Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, false);
+      Cylinder = new _cylinder(e, false);
+      Cone = new _cone(e, false);
+    }
     DrawModes[4] = !DrawModes[4];
 
     break;
   case _draw_modes::FLAT:
+    if (Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, false);
+      Cylinder = new _cylinder(e, false);
+      Cone = new _cone(e, false);
+    }
     DrawModes[3] = !DrawModes[3];
     break;
   case _draw_modes::TEXTURE:
+    if (!Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, true);
+      Cylinder = new _cylinder(e, true);
+      Cone = new _cone(e, true);
+    }
     DrawModes[5] = !DrawModes[5];
     break;
   case _draw_modes::TEXTURE_FLAT:
+    if (!Cone->text)
+    {
+      e = Cone->ej;
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, true);
+      Cylinder = new _cylinder(e, true);
+      Cone = new _cone(e, true);
+    }
     DrawModes[6] = !DrawModes[6];
     break;
 
   case _draw_modes::TEXTURE_SMOOTH:
+    if (!Cone->text)
+    {
+      e = Cone->ej;
+
+      delete Sphere;
+      delete Cone;
+      delete Cylinder;
+
+      Sphere = new _sphere(e, true);
+      Cylinder = new _cylinder(e, true);
+      Cone = new _cone(e, true);
+    }
     DrawModes[7] = !DrawModes[7];
     break;
   }
@@ -1411,8 +1264,8 @@ void _gl_widget::ObjectType(_object ot)
   case _object::OBJECT_PLY:
     Object = _object::OBJECT_PLY;
     break;
-  case _object::OBJECT_PERRO:
-    Object = _object::OBJECT_PERRO;
+  case _object::OBJECT_SPOT:
+    Object = _object::OBJECT_SPOT;
     break;
   case _object::OBJECT_TABLERO:
     Object = _object::OBJECT_TABLERO;
@@ -1426,5 +1279,516 @@ void _gl_widget::ObjectType(_object ot)
     Object = _object::PLYS;
     break;
   }
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// MOVER MODELO
+//////////////////////////////////////////////////////////////////////////////
+
+void _gl_widget::Forearm(_opciones opcion)
+{
+  int size = dogocopter->dog->legs.size();
+  for (int i = 0; i < size; i++)
+    switch (opcion)
+    {
+    case _opciones::OP1:
+      if (dogocopter->dog->legs[i]->forearm->getD1() < 0)
+        dogocopter->dog->legs[i]->forearm->setD1(gr1);
+      break;
+
+    case _opciones::OP2:
+      if (dogocopter->dog->legs[i]->forearm->getD1() > -90)
+        dogocopter->dog->legs[i]->forearm->setD1(-gr1);
+      break;
+
+    case _opciones::OP3:
+      dogocopter->dog->legs[i]->forearm->setD2(gr2);
+      break;
+    case _opciones::OP4:
+      if (dogocopter->dog->legs[i]->forearm->getD2() > 0)
+        dogocopter->dog->legs[i]->forearm->setD2(-gr2);
+      break;
+    }
+
+  update();
+}
+
+void _gl_widget::ArmBody(_opciones opcion)
+{
+  switch (opcion)
+  {
+    //Modificación patas delanteras.
+  case _opciones::OP1:
+    if (dogocopter->dog->legs[0]->getD1() < 90)
+    {
+      dogocopter->dog->legs[0]->setD1(gr3);
+      dogocopter->dog->legs[1]->setD1(gr3);
+    }
+    break;
+  case _opciones::OP2:
+    if (dogocopter->dog->legs[0]->getD1() > -90)
+    {
+      dogocopter->dog->legs[0]->setD1(-gr3);
+      dogocopter->dog->legs[1]->setD1(-gr3);
+    }
+    break;
+
+  case _opciones::OP3:
+    if (dogocopter->dog->legs[0]->getD2() < 45 && (dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2()) < 45)
+    {
+      dogocopter->dog->legs[0]->setD2(gr4);
+      dogocopter->dog->legs[1]->setD2(gr4);
+    }
+    break;
+  case _opciones::OP4:
+    if (dogocopter->dog->legs[0]->getD2() > -45 && (dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2()) > -45)
+    {
+      dogocopter->dog->legs[0]->setD2(-gr4);
+      dogocopter->dog->legs[1]->setD2(-gr4);
+    }
+    break;
+
+    //Modificación patas Traseras.
+  case _opciones::OP5:
+    if (dogocopter->dog->legs[2]->getD1() < 90)
+    {
+      dogocopter->dog->legs[2]->setD1(gr3);
+      dogocopter->dog->legs[3]->setD1(gr3);
+    }
+    break;
+  case _opciones::OP6:
+    if (dogocopter->dog->legs[2]->getD1() > -90)
+    {
+      dogocopter->dog->legs[2]->setD1(-gr3);
+      dogocopter->dog->legs[3]->setD1(-gr3);
+    }
+    break;
+
+  case _opciones::OP7:
+    if (dogocopter->dog->legs[2]->getD2() < 45 && (dogocopter->dog->legs[2]->getD2() - dogocopter->dog->legs[0]->getD2()) < 45)
+    {
+      dogocopter->dog->legs[2]->setD2(gr4);
+      dogocopter->dog->legs[3]->setD2(gr4);
+    }
+    break;
+  case _opciones::OP8:
+    if (dogocopter->dog->legs[2]->getD2() > -45 && (dogocopter->dog->legs[2]->getD2() - dogocopter->dog->legs[0]->getD2()) > -45)
+    {
+      dogocopter->dog->legs[2]->setD2(-gr4);
+      dogocopter->dog->legs[3]->setD2(-gr4);
+    }
+    break;
+  }
+
+  dogocopter->dog->setD1(dogocopter->dog->legs[0]->getD2());
+  dogocopter->dog->setD2(dogocopter->dog->legs[2]->getD2());
+
+  dogocopter->setD2(dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2());
+
+  update();
+}
+
+void _gl_widget::Fly(_opciones opcion)
+{
+
+  switch (opcion)
+  {
+
+  case _opciones::OP1:
+    dogocopter->gorrocopter->setD1(gr5);
+    break;
+
+  case _opciones::OP2:
+    dogocopter->gorrocopter->setD1(-gr5);
+    break;
+
+  case _opciones::OP3:
+    dogocopter->gorrocopter->setD2(gr6);
+    break;
+  case _opciones::OP4:
+    if (dogocopter->gorrocopter->getD2() > 0)
+      dogocopter->gorrocopter->setD2(-gr6);
+    break;
+  }
+
+  dogocopter->setD1(dogocopter->gorrocopter->getD1());
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// MODIFCIAR RATIOS DE LOS GRADOS DE LIBERTAD DEL MODELO
+//////////////////////////////////////////////////////////////////////////////
+
+void _gl_widget::Ratios(_opciones opcion)
+{
+  switch (opcion)
+  {
+
+  case _opciones::OP1:
+    gr1++;
+    break;
+
+  case _opciones::OP2:
+    if (gr1 > 1)
+      gr1--;
+    break;
+
+  case _opciones::OP3:
+    gr2++;
+    break;
+  case _opciones::OP4:
+    if (gr2 > 1)
+      gr2--;
+    break;
+
+  case _opciones::OP5:
+    gr3++;
+    break;
+
+  case _opciones::OP6:
+    if (gr3 > 1)
+      gr3--;
+    break;
+  case _opciones::OP7:
+    gr4++;
+    break;
+
+  case _opciones::OP8:
+    if (gr4 > 1)
+      gr4--;
+    break;
+
+  case _opciones::OP9:
+    gr5++;
+    break;
+
+  case _opciones::OP10:
+    if (gr5 > 1)
+      gr5--;
+    break;
+  case _opciones::OP11:
+    gr6++;
+    break;
+
+  case _opciones::OP12:
+    if (gr6 > 1)
+      gr6--;
+    break;
+  }
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// COMENZAR Y PARAR ANIMACIÓN
+//////////////////////////////////////////////////////////////////////////////
+void _gl_widget::Animacion()
+{
+
+  animacion = !animacion;
+  if (animacion)
+    timer->start(20);
+  else
+    timer->stop();
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// MODIFICAR LUCES Y MATERIALES
+//////////////////////////////////////////////////////////////////////////////
+void _gl_widget::Luces_Materiales(_opciones opcion)
+{
+  switch (opcion)
+  {
+
+  case _opciones::OP1:
+    first_light = !first_light;
+    break;
+
+  case _opciones::OP2:
+    second_light = !second_light;
+    break;
+
+  case _opciones::OP3:
+    material = (material + 1) % 3;
+    break;
+  case _opciones::OP4:
+    flx = (flx + 4);
+    break;
+
+  case _opciones::OP5:
+    fly = (fly + 4);
+    break;
+
+  case _opciones::OP6:
+    flz = (flz + 4);
+
+    break;
+  case _opciones::OP7:
+    flx = (flx - 4);
+    break;
+  case _opciones::OP8:
+    fly = (fly - 4);
+    break;
+  case _opciones::OP9:
+    flz = (flz - 4);
+    break;
+  }
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// CAMBIAR PERSPECTIVA
+//////////////////////////////////////////////////////////////////////////////
+void _gl_widget::Perspectiva(_opciones opcion)
+{
+  switch (opcion)
+  {
+  case _opciones::OP1:
+    projection = false;
+    break;
+
+  case _opciones::OP2:
+
+    projection = true;
+    break;
+  }
+
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// CAMBIAR GENERATRIZ ESFERA
+//////////////////////////////////////////////////////////////////////////////
+void _gl_widget::Ejes(_opciones opcion)
+{
+
+  switch (opcion)
+  {
+  case _opciones::OP1:
+    e = eje::EJE_X;
+    break;
+
+  case _opciones::OP2:
+    e = eje::EJE_Y;
+    break;
+
+  case _opciones::OP3:
+    e = eje::EJE_Z;
+    break;
+  }
+
+  bool aux = Sphere->text;
+  delete Sphere;
+  delete Cone;
+  delete Cylinder;
+
+  Sphere = new _sphere(e, aux);
+  Cylinder = new _cylinder(e, aux);
+  Cone = new _cone(e, aux);
+  update();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+////////// ANIMACIÓN
+//////////////////////////////////////////////////////////////////////////////
+void _gl_widget::idle()
+{
+  float fa = (9.0 / 60.0);
+
+  switch (F)
+  {
+
+  case _fases::F1:
+    if (dogocopter->dog->legs[0]->getD1() < 90)
+    {
+      //Patas delanteras rot
+      for (int i = 0; i < 2; i++)
+        dogocopter->dog->legs[i]->setD1(gr3 * 1);
+
+      //Patas delanteras tr
+      if (dogocopter->dog->legs[0]->getD2() < 9)
+      {
+        for (int i = 0; i < 2; i++)
+          dogocopter->dog->legs[i]->setD2(0.1 * gr4);
+        dogocopter->setD2(dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2());
+        dogocopter->dog->setD1(dogocopter->dog->legs[0]->getD2());
+        dogocopter->dog->setD2(dogocopter->dog->legs[2]->getD2());
+      }
+
+      //Antebrazos
+      if (dogocopter->dog->legs[0]->forearm->getD1() > -90)
+        for (int i = 0; i < 4; i++)
+          dogocopter->dog->legs[i]->forearm->setD1(-1 * gr1);
+    }
+    else
+      F = _fases::F2;
+    break;
+
+  case _fases::F2:
+    if (dogocopter->dog->legs[2]->getD1() > -90)
+    {
+      //Patas traseras.
+      for (int i = 2; i < 4; i++)
+        dogocopter->dog->legs[i]->setD1(-1 * gr3);
+      dogocopter->setD2(dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2());
+      dogocopter->dog->setD1(dogocopter->dog->legs[0]->getD2());
+      dogocopter->dog->setD2(dogocopter->dog->legs[2]->getD2());
+
+      //
+      if (dogocopter->dog->legs[0]->getD2() > 0)
+        for (int i = 0; i < 2; i++)
+          dogocopter->dog->legs[i]->setD2(-0.1 * gr4);
+
+      //
+      if (dogocopter->dog->legs[0]->getD1() > 0)
+        for (int i = 0; i < 2; i++)
+          dogocopter->dog->legs[i]->setD1(-1 * gr3);
+      //
+      if (dogocopter->dog->legs[0]->forearm->getD1() < 0)
+        for (int i = 0; i < 4; i++)
+          dogocopter->dog->legs[i]->forearm->setD1(1 * gr1);
+
+      //
+      if (dogocopter->dog->legs[2]->getD2() < 9)
+        for (int i = 2; i < 4; i++)
+          dogocopter->dog->legs[i]->setD2(0.1 * gr4);
+      //
+      if (dogocopter->dog->legs[0]->forearm->getD2() < 4.5)
+        for (int i = 0; i < 4; i++)
+          dogocopter->dog->legs[i]->forearm->setD2(0.05 * gr2);
+    }
+    else
+      F = _fases::F3;
+
+    break;
+  case _fases::F3:
+    if (dogocopter->dog->legs[0]->getD1() > -60)
+    {
+      for (int i = 0; i < 2; i++)
+        dogocopter->dog->legs[i]->setD1(-1 * gr3);
+      dogocopter->setD2(dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2());
+      dogocopter->dog->setD1(dogocopter->dog->legs[0]->getD2());
+      dogocopter->dog->setD2(dogocopter->dog->legs[2]->getD2());
+
+      if (dogocopter->gorrocopter->getD1() < 90)
+      {
+        dogocopter->gorrocopter->setD1(1.5 * gr5);
+        dogocopter->setD1(dogocopter->gorrocopter->getD1());
+      }
+
+      if (dogocopter->dog->legs[0]->forearm->getD1() > -60)
+        for (int i = 0; i < 4; i++)
+          dogocopter->dog->legs[i]->forearm->setD1(-1 * gr1);
+
+      if (dogocopter->dog->legs[2]->getD1() < 60)
+        for (int i = 2; i < 4; i++)
+          dogocopter->dog->legs[i]->setD1(2.5 * gr3);
+
+      if (dogocopter->dog->legs[0]->forearm->getD2() > 0)
+        for (int i = 0; i < 4; i++)
+          dogocopter->dog->legs[i]->forearm->setD2(-0.075 * gr2);
+
+      if (dogocopter->gorrocopter->getD2() < 4.5)
+        dogocopter->gorrocopter->setD2(0.075 * gr6);
+
+      dogocopter->setD1(dogocopter->gorrocopter->getD1());
+    }
+    else
+      F = _fases::F4;
+    break;
+
+  case _fases::F4:
+    if (dogocopter->dog->legs[2]->getD1() > 0)
+    {
+      for (int i = 2; i < 4; i++)
+        dogocopter->dog->legs[i]->setD1(-1 * gr3);
+      dogocopter->setD2(dogocopter->dog->legs[0]->getD2() - dogocopter->dog->legs[2]->getD2());
+      dogocopter->dog->setD1(dogocopter->dog->legs[0]->getD2());
+      dogocopter->dog->setD2(dogocopter->dog->legs[2]->getD2());
+
+      if (dogocopter->dog->legs[0]->forearm->getD1() > -90)
+        for (int i = 0; i < 4; i++)
+          dogocopter->dog->legs[i]->forearm->setD1(-0.5 * gr1);
+
+      if (dogocopter->dog->legs[0]->getD1() < 90)
+        for (int i = 0; i < 2; i++)
+          dogocopter->dog->legs[i]->setD1(2.5 * gr3);
+
+      if (dogocopter->dog->legs[2]->getD2() > 0)
+        for (int i = 2; i < 4; i++)
+          dogocopter->dog->legs[i]->setD2(-fa * gr4);
+
+      if (dogocopter->dog->legs[0]->getD2() < 9)
+        for (int i = 0; i < 2; i++)
+          dogocopter->dog->legs[i]->setD2(fa * gr4);
+
+      if (dogocopter->gorrocopter->getD1() > 0)
+      {
+        dogocopter->gorrocopter->setD1(-1.5 * gr5);
+        dogocopter->setD1(dogocopter->gorrocopter->getD1());
+      }
+
+      if (dogocopter->gorrocopter->getD2() > 0)
+        dogocopter->gorrocopter->setD2(-0.075 * gr6);
+    }
+    else
+      F = _fases::F2;
+    break;
+  }
+
+  update();
+}
+
+void _gl_widget::choose_ply(_opciones op)
+{
+  vector_plys.clear();
+  vector_plys.resize(size_ply * size_ply);
+  for (int i = 0; i < size_ply * size_ply; i++)
+  {
+    _ply aux(op);
+    vector_plys[i] = aux;
+  }
+
+  Ply = new _ply(op);
+  update();
+}
+
+void _gl_widget::choose_texture(_opciones op)
+{
+  string textura;
+  textura.clear();
+
+  switch (op)
+  {
+  case _opciones::OP1:
+    textura += "../texturas/2k_mars.jpg";
+    break;
+
+  case _opciones::OP2:
+    textura += "../texturas/2k_stars.jpg";
+    break;
+
+  case _opciones::OP3:
+    textura += "../texturas/2k_sun.jpg";
+    break;
+
+  case _opciones::OP4:
+    textura += "../texturas/2k_venus_surface.jpg";
+    break;
+
+  case _opciones::OP5:
+    textura += "../texturas/mercury.jpg";
+    break;
+
+  case _opciones::OP6:
+    textura += "../texturas/2k_earth_daymap.jpg";
+    break;
+  }
+
+  Sphere->textura = textura;
+  Cylinder->textura = textura;
+  Cone->textura = textura;
+  Tablero.textura = textura;
   update();
 }

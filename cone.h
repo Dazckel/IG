@@ -8,11 +8,12 @@
 #ifndef CONE_H
 #define CONE_H
 
+
 #include "object_rev.h"
 class _cone: public _revolution
 {
     public:
-    _cone();
+    _cone(eje e = eje::EJE_Y,bool textura = false);
 };
 
 #endif

@@ -7,11 +7,28 @@
 
 #include "object_ply.h"
 
-_ply::_ply(){
+_ply::_ply(_opciones op ){
 
     //Abrimos el fichero.
     _file_ply obj;
-    obj.open("/home/dazckel/Facultad/IG/ply_models/bunny.ply");
+    switch (op)
+    {
+    case _opciones::OP1:
+        fichero.clear();
+        fichero += "/home/dazckel/Facultad/IG/ply_models/big_dodge.ply";
+        break;
+
+    case _opciones::OP2:
+        fichero.clear();
+        fichero += "/home/dazckel/Facultad/IG/ply_models/beethoven.ply";
+        break;
+
+    case _opciones::OP3:
+        fichero.clear();
+        fichero += "/home/dazckel/Facultad/IG/ply_models/ant.ply";
+        break;
+    }
+    obj.open(fichero);
 
     vector<float> coord;
     vector<unsigned int> pos;
@@ -41,3 +58,4 @@ _ply::_ply(){
 
 
 }
+
