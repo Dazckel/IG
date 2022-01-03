@@ -171,8 +171,10 @@ void _gl_widget::pick()
   int Color;
   glReadBuffer(GL_FRONT);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
   glReadPixels(Selection_position_x, Selection_position_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &Color);
 
+  cout << Color << endl;
   /*************************/
 
   uint B = uint((Color & 0x00FF0000) >> 16);
@@ -1065,7 +1067,7 @@ void _gl_widget::lights_options()
   {
 
     GLfloat light_ambient[] = {0.1, 0.1, 0.1, 1};
-    GLfloat light_specular[] = {1, 1, 1, 1};
+    GLfloat light_specular[] = {0.3, 0.3, 0.3, 0.3};
     GLfloat light_position0[] = {1.0, 1.0, 1.0, 0.0};
     GLfloat lightDifuse[] = {0.6, 0.6, 0.6, 6};
     //CONFIGURACIÓN LUZ
@@ -1081,7 +1083,7 @@ void _gl_widget::lights_options()
   {
 
     GLfloat light_ambient1[] = {0.1, 0.0, 0.1, 1};
-    GLfloat light_specular1[] = {1, 0.0, 1, 1};
+    GLfloat light_specular1[] = {0.4, 0.0, 0.4, 0.4};
     GLfloat light_position1[] = {1.0, 1.0, 1.0, 1.0};
     GLfloat lightDifuse1[] = {0.5, 0.0, 0.5, 1};
     //CONFIGURACIÓN LUZ

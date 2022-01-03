@@ -24,5 +24,5 @@ _sphere::_sphere(eje e,bool textura)
         e = eje::EJE_Y;
         break;
     }
-    crear_OR(v,100,e,objeto::SPHERE_P);
+    crear_OR(v,20,e,objeto::SPHERE_P);
 }

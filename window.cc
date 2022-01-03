@@ -456,13 +456,15 @@ _window::_window()
         QPushButton *buttonPl_1 = new QPushButton("Big dodge");
         QPushButton *buttonPl_2 = new QPushButton("Beethoven");
         QPushButton *buttonPl_3 = new QPushButton("Hormiga");
+        QPushButton *buttonPl_4 = new QPushButton("Revolución");
         QGridLayout *layoutPl = new QGridLayout(wipPl);
 
         QLabel *Pl = new QLabel("Elegir Ply");
 
         layoutPl->addWidget(buttonPl_1, 0, 0);
         layoutPl->addWidget(buttonPl_2, 0, 1);
-        layoutPl->addWidget(buttonPl_3, 0, 2);
+        layoutPl->addWidget(buttonPl_3, 1, 0);
+        layoutPl->addWidget(buttonPl_4, 1, 1);
 
         connect(buttonPl_1, &QPushButton::pressed, this, [this]
                 { choose_ply(_opciones::OP1); });
@@ -470,6 +472,8 @@ _window::_window()
                 { choose_ply(_opciones::OP2); });
         connect(buttonPl_3, &QPushButton::pressed, this, [this]
                 { choose_ply(_opciones::OP3); });
+        connect(buttonPl_4, &QPushButton::pressed, this, [this]
+                { choose_ply(_opciones::OP4); });
 
         ////////////////////////////////////////////////////////////////////
 

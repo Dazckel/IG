@@ -9,6 +9,11 @@
 #define PLY
 
 #include "object3d.h"
+
+#ifndef REVOLUTION_H
+#include "object_rev.h"
+#endif
+
 #include "file_ply_stl.h"
 
 #ifndef MODEL_PARAM
@@ -25,6 +30,7 @@ class _ply : public _object3D
 
     private:
         string fichero;
+        
 };
 
 #endif

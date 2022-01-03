@@ -7,7 +7,8 @@
 
 #include "object_ply.h"
 
-_ply::_ply(_opciones op ){
+_ply::_ply(_opciones op)
+{
 
     //Abrimos el fichero.
     _file_ply obj;
@@ -27,35 +28,44 @@ _ply::_ply(_opciones op ){
         fichero.clear();
         fichero += "/home/dazckel/Facultad/IG/ply_models/ant.ply";
         break;
+    case _opciones::OP4:
+        fichero.clear();
+        fichero += "/home/dazckel/Facultad/IG/ply_models/plantilla.ply";
+        break;
     }
+
     obj.open(fichero);
 
     vector<float> coord;
     vector<unsigned int> pos;
     //Obtenemos las coordenadas de los puntos y la posicion que ocupan.
-    obj.read(coord,pos);
+    obj.read(coord, pos);
     obj.close();
-
 
     //rellenamos el vector de vértices
     int tam = coord.size();
-    Vertices.resize(tam/3);
+    Vertices.resize(tam / 3);
 
     int k = 0;
-    for(int i = 0 ; i < tam;i+=3,k++)
+    for (int i = 0; i < tam; i += 3, k++)
     {
         Vertices[k].x = coord[i];
-        Vertices[k].y = coord[i+1];
-        Vertices[k].z = coord[i+2];
+        Vertices[k].y = coord[i + 1];
+        Vertices[k].z = coord[i + 2];
     }
 
-    //Creamos los triangulos
-    int siz =pos.size();
-    Triangles.resize(siz/3);
-    k=0;
-    for(int i = 0;i < siz;i+=3,k++)
-        Triangles[k] = _vertex3ui(pos[i],pos[i+1],pos[i+2]);
-
-
+    if (op == _opciones::OP4)
+    {
+        _revolution plantilla(Vertices,100,eje::EJE_X,objeto::CONE);
+        Vertices = plantilla.Vertices;
+        Triangles = plantilla.Triangles;
+    }
+    else
+    {
+        int siz = pos.size();
+        Triangles.resize(siz / 3);
+        k = 0;
+        for (int i = 0; i < siz; i += 3, k++)
+            Triangles[k] = _vertex3ui(pos[i], pos[i + 1], pos[i + 2]);
+    }
 }
-

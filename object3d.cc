@@ -363,6 +363,7 @@ void _object3D::draw_texture_flat()
   int p = 0;
   float fact_y = 1.0f / nv_plantilla;
   float fact_x = 1.0f / num_rot;
+
   for (int i = 0; i <= num_rot; i++)
     for (int j = 0; j < nv_plantilla; j++, p++)
       texture_coordinate[p] = _vertex2f(i * fact_x, j * fact_y);

@@ -37,6 +37,7 @@ public:
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     _revolution();
+    _revolution(vector<_vertex3f> v, float nr, eje e, objeto o);
     bool dentro_eje(_vertex3f p, eje e = eje::EJE_Y);
     void crear_OR(vector<_vertex3f> v, float nr, eje e, objeto o);
     void GenerarTriangulos(vector<_vertex3f> v, float nr, eje e = eje::EJE_Y);

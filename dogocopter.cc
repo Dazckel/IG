@@ -19,7 +19,7 @@ void _dogocopter::Draw_xxx(_draw_modes_model dm)
     glPopMatrix();
 
     glPushMatrix();
-    glTranslated(0, 0.05 * tr + 8.25, 0);
+    glTranslated(0, 0.05 * tr + 8.75, 0);
     glRotated(rot, 0, 0, 1); //Cuando el perro se inclina, el gorrocoptero tmbn
     gorrocopter->Draw_xxx(dm);
     glPopMatrix();

@@ -17,15 +17,15 @@ _cone::_cone(eje e,bool textura)
         
         break;
     case eje::EJE_Y:
-        v[2] = _vertex3f(0.0,0.5,0);
+        v[2] = _vertex3f(0,0.5,0);
         v[1] = _vertex3f(0.5,-0.5,0); 
         v[0] = _vertex3f(0,-0.5,0);
         break;
     case eje::EJE_Z:
-        v[2] = _vertex3f(0,0,-0.5);
+        v[2] = _vertex3f(0,0,0.5);
         v[1] = _vertex3f(0,0.5,-0.5); 
-        v[0] = _vertex3f(0,0,0.5);
+        v[0] = _vertex3f(0,0,-0.5);
         break;
     }
-    crear_OR(v,30,e,objeto::CONE);
+    crear_OR(v,20,e,objeto::CONE);
 }
